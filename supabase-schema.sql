@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS public.domains (
   verification_token UUID NOT NULL DEFAULT uuid_generate_v4(),
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('active', 'inactive', 'pending')),
   shield_enabled BOOLEAN NOT NULL DEFAULT true,
+  checkout_url TEXT DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

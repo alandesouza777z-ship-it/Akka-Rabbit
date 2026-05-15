@@ -13,6 +13,9 @@ import {
   Shield,
   X,
   Loader2,
+  Zap,
+  Link,
+  Crown,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -22,6 +25,7 @@ interface Domain {
   verification_token: string;
   status: string;
   shield_enabled: boolean;
+  checkout_url: string | null;
   created_at: string;
 }
 
@@ -34,11 +38,21 @@ export default function DomainsPage() {
   const [error, setError] = useState("");
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [showScriptForDomain, setShowScriptForDomain] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<string>("starter");
+  const [newCheckoutUrl, setNewCheckoutUrl] = useState("");
 
   const fetchDomains = useCallback(async () => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Fetch user plan
+    const { data: profile } = await supabase
+      .from("users")
+      .select("plan_tier")
+      .eq("id", user.id)
+      .single();
+    if (profile) setUserPlan(profile.plan_tier);
 
     const { data } = await supabase
       .from("domains")
@@ -64,11 +78,17 @@ export default function DomainsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { error: insertError } = await supabase.from("domains").insert({
+      const insertData: Record<string, unknown> = {
         user_id: user.id,
         domain_url: newDomain.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""),
         status: "pending",
-      });
+      };
+      // Enterprise: include checkout URL if provided
+      if (userPlan === "enterprise" && newCheckoutUrl.trim()) {
+        insertData.checkout_url = newCheckoutUrl.trim();
+      }
+
+      const { error: insertError } = await supabase.from("domains").insert(insertData);
 
       if (insertError) {
         setError(insertError.message);
@@ -76,6 +96,7 @@ export default function DomainsPage() {
       }
 
       setNewDomain("");
+      setNewCheckoutUrl("");
       setShowAddModal(false);
       fetchDomains();
     } catch {
@@ -98,6 +119,15 @@ export default function DomainsPage() {
     await supabase
       .from("domains")
       .update({ shield_enabled: !enabled })
+      .eq("id", id);
+    fetchDomains();
+  };
+
+  const updateCheckoutUrl = async (id: string, url: string) => {
+    const supabase = createClient();
+    await supabase
+      .from("domains")
+      .update({ checkout_url: url || null })
       .eq("id", id);
     fetchDomains();
   };
@@ -292,6 +322,32 @@ export default function DomainsPage() {
                   </button>
                 </div>
               </div>
+
+              {/* Enterprise: Checkout URL Hijack Config */}
+              {userPlan === "enterprise" && (
+                <div className="mt-4 pt-4 border-t border-border-neon/30">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Retaliação de Clone — Enterprise</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link className="w-3 h-3 text-text-muted shrink-0" />
+                    <input
+                      type="text"
+                      defaultValue={domain.checkout_url || ""}
+                      placeholder="https://pay.hotmart.com/seu-link"
+                      className="input-neon text-xs flex-1"
+                      onBlur={(e) => updateCheckoutUrl(domain.id, e.target.value)}
+                    />
+                    <Zap className={`w-4 h-4 shrink-0 ${domain.checkout_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
+                  </div>
+                  <p className="font-mono text-[9px] text-text-muted mt-1">
+                    {domain.checkout_url 
+                      ? "✓ Armadilha ativa: clones deste domínio terão seus botões de compra redirecionados para o seu checkout."
+                      : "Cole seu link de checkout (Hotmart, Kiwify, etc). Se alguém clonar sua página, as vendas cairão na SUA conta."}
+                  </p>
+                </div>
+              )}
             </motion.div>
           ))}
         </div>
@@ -348,6 +404,27 @@ export default function DomainsPage() {
                   Insira apenas o domínio sem http:// ou https://
                 </p>
               </div>
+
+              {/* Enterprise: Checkout URL field */}
+              {userPlan === "enterprise" && (
+                <div className="mb-4">
+                  <label className="font-mono text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <span className="text-yellow-500">Link de Checkout (Retaliação)</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={newCheckoutUrl}
+                    onChange={(e) => setNewCheckoutUrl(e.target.value)}
+                    placeholder="https://pay.hotmart.com/seu-link"
+                    className="input-neon"
+                    id="checkout-url-input"
+                  />
+                  <p className="font-mono text-[10px] mt-2 text-yellow-500/70">
+                    Se alguém clonar este domínio, os botões de compra da página clonada serão silenciosamente substituídos pelo SEU link.
+                  </p>
+                </div>
+              )}
 
               <div className="flex gap-3">
                 <button
@@ -426,8 +503,15 @@ export default function DomainsPage() {
       });
       const data = await res.json();
       if (data.blocked) {
-        // Redireciona bots e espiões para a página de bloqueio
-        window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; 
+        window.location.href = 'https://ta-indo-aonde-show.vercel.app/';
+      }
+      // Retaliação silenciosa: substitui links de checkout em sites clonados
+      if (data.hijack && data.checkout_url) {
+        document.querySelectorAll('a[href]').forEach(function(el) {
+          if (/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) {
+            el.href = data.checkout_url;
+          }
+        });
       }
     } catch(e) {}
   })();

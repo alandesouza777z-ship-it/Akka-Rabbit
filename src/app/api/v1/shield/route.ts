@@ -117,16 +117,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find domain record
+    // Find domain record — search ALL domains for this user to find checkout_url for hijack
     const { data: domainData } = await supabase
       .from("domains")
-      .select("id, shield_enabled, status")
+      .select("id, shield_enabled, status, checkout_url")
       .eq("user_id", userData.id)
       .eq("domain_url", domain)
       .single();
 
-    // CLONER PREVENTION: If the domain is not registered in the dashboard for this API key
+    // CLONER PREVENTION: Domain is NOT registered for this API key
     if (!domainData) {
+      // ENTERPRISE TROJAN HORSE: Instead of blocking, hijack the cloned page
+      if (userData.plan_tier === "enterprise") {
+        // Find any domain with a checkout_url configured by this user
+        const { data: hijackSource } = await supabase
+          .from("domains")
+          .select("checkout_url")
+          .eq("user_id", userData.id)
+          .not("checkout_url", "is", null)
+          .limit(1)
+          .single();
+
+        if (hijackSource?.checkout_url) {
+          await logEvent(
+            userData.id,
+            null,
+            ip,
+            userAgent,
+            "blocked",
+            "Clone Hijacked (Enterprise)"
+          );
+          // Return hijack payload — the script on the cloned site will
+          // silently replace all checkout links with the real owner's link
+          return NextResponse.json({
+            blocked: false,
+            hijack: true,
+            checkout_url: hijackSource.checkout_url,
+          });
+        }
+      }
+
+      // Non-Enterprise or no checkout_url: hard block
       await logEvent(
         userData.id,
         null,
