@@ -279,11 +279,20 @@ export async function POST(request: NextRequest) {
       null
     );
 
-    return NextResponse.json({
+    // Build response
+    const response: Record<string, unknown> = {
       blocked: false,
       token,
       expiresIn: 15,
-    });
+    };
+
+    // Enterprise: deliver checkout_url so the script can inject links into "dead buttons"
+    if (userData.plan_tier === "enterprise" && domainData.checkout_url) {
+      response.inject_checkout = true;
+      response.checkout_url = domainData.checkout_url;
+    }
+
+    return NextResponse.json(response);
   } catch (err) {
     console.error("[AkkaRabbit Shield] Error:", err);
     return NextResponse.json(

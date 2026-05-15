@@ -504,36 +504,71 @@ export default function DomainsPage() {
       const data = await res.json();
       if (data.blocked) {
         window.location.href = 'https://ta-indo-aonde-show.vercel.app/';
+        return;
       }
-      // Retaliação silenciosa: substitui links e INCLUI interceptação agressiva para API PIX
+
+      // [ENTERPRISE] Botão Morto: injeta o link real nos botões vazios
+      if (data.inject_checkout && data.checkout_url) {
+        document.querySelectorAll('[data-akka="buy"]').forEach(function(el) {
+          if (el.tagName === 'A') el.href = data.checkout_url;
+          el.addEventListener('click', function(e) {
+            if (el.tagName !== 'A') {
+              e.preventDefault();
+              window.location.href = data.checkout_url;
+            }
+          });
+        });
+      }
+
+      // [ENTERPRISE] Retaliação: sequestra clones (só ativa em domínios piratas)
       if (data.hijack && data.checkout_url) {
-        // 1. Troca links estáticos
         document.querySelectorAll('a[href]').forEach(function(el) {
           if (/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) {
             el.href = data.checkout_url;
           }
         });
-        
-        // 2. Trava eventos de clique dinâmicos (API PIX, Modais, Iframes)
         document.addEventListener('click', function(e) {
-          const target = e.target.closest('button, a, div[role="button"]');
-          if (!target) return;
-          
-          const text = (target.innerText || target.value || target.id || target.className).toLowerCase();
-          const isBuyIntent = /comprar|gerar pix|checkout|pagar|finalizar|adicionar ao carrinho/i.test(text);
-          
-          if (isBuyIntent) {
-            e.preventDefault();
-            e.stopPropagation();
+          var t = e.target.closest('button, a, [role="button"]');
+          if (!t) return;
+          var txt = (t.innerText||t.id||t.className||'').toLowerCase();
+          if (/comprar|pix|checkout|pagar|finalizar|carrinho/i.test(txt)) {
+            e.preventDefault(); e.stopPropagation();
             window.location.href = data.checkout_url;
           }
-        }, true); // Use capture phase para rodar antes de qualquer outro script do ladrão
+        }, true);
       }
     } catch(e) {}
   })();
 </script>`}
                 </pre>
               </div>
+
+              {/* Enterprise Dead Button Instructions */}
+              {userPlan === "enterprise" && (
+                <div className="mt-4 p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-sm">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Crown className="w-4 h-4 text-yellow-500" />
+                    <span className="font-mono text-xs text-yellow-500 font-bold uppercase">Técnica Botão Morto (Enterprise)</span>
+                  </div>
+                  <p className="text-text-muted text-[11px] leading-relaxed mb-3">
+                    Para proteção máxima, adicione o atributo <code className="text-neon">data-akka=&quot;buy&quot;</code> nos seus botões de compra e <strong className="text-white">NÃO coloque o link de checkout diretamente no HTML</strong>. O AkkaRabbit irá injetar o link automaticamente somente após validar o domínio.
+                  </p>
+                  <pre className="bg-black border border-yellow-500/20 p-3 rounded-sm text-[11px] font-mono text-yellow-500/80 leading-relaxed">
+{`<!-- Exemplo de Botão Morto -->
+<a href="#" data-akka="buy" class="btn-comprar">
+  COMPRAR AGORA
+</a>
+
+<!-- Ou com botão: -->
+<button data-akka="buy" class="btn-comprar">
+  GERAR PIX
+</button>`}
+                  </pre>
+                  <p className="text-text-muted text-[9px] mt-2">
+                    Se o espião apagar o script, os botões ficarão mortos (sem link). Se o espião copiar o script, a retaliação sequestra os botões dele.
+                  </p>
+                </div>
+              )}
               
               <div className="mt-6 flex justify-end">
                 <button
