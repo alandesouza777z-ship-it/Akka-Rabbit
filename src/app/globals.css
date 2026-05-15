@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
@@ -11,20 +11,22 @@
   --color-bg-secondary: #050505;
   --color-bg-card: rgba(10, 10, 10, 0.8);
   --color-bg-card-hover: rgba(15, 15, 15, 0.9);
-  --color-border-neon: rgba(0, 255, 65, 0.2);
-  --color-border-neon-strong: rgba(0, 255, 65, 0.5);
-  --color-text-primary: #e0e0e0;
-  --color-text-secondary: #888888;
+  --color-bg-elevated: rgba(255, 255, 255, 0.02);
+  --color-border-neon: rgba(0, 255, 65, 0.12);
+  --color-border-neon-strong: rgba(0, 255, 65, 0.4);
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #a0a0a0;
   --color-text-muted: #555555;
-  --color-danger: #ff3333;
+  --color-danger: #ff4444;
   --color-warning: #ffaa00;
   --color-success: #00FF41;
 
-  --font-mono: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-/* === BASE RESET (box-sizing only - Tailwind handles margin/padding) === */
+/* === BASE === */
 *, *::before, *::after {
   box-sizing: border-box;
 }
@@ -36,7 +38,7 @@ html {
 
 body {
   background: #000000;
-  color: #e0e0e0;
+  color: #f0f0f0;
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -45,30 +47,28 @@ body {
   min-height: 100vh;
 }
 
-/* === SCROLLBAR === */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: rgba(0, 255, 65, 0.3); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 65, 0.5); }
+/* === SCROLLBAR (Minimal) === */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.08); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0, 255, 65, 0.2); }
 
-/* === SELECTION === */
-::selection { background: rgba(0, 255, 65, 0.3); color: #00FF41; }
+::selection { background: rgba(0, 255, 65, 0.2); color: #00FF41; }
 
 @layer utilities {
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 4px;
+    height: 4px;
   }
   .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 4px;
+    background: transparent;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(0, 255, 170, 0.3);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
   }
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(0, 255, 170, 0.5);
+    background: rgba(0, 255, 65, 0.15);
   }
 
   @keyframes carousel {
@@ -81,54 +81,65 @@ body {
   }
 }
 
-/* === NEON GLOW UTILITIES === */
-.glow-neon {
-  box-shadow: 0 0 5px rgba(0, 255, 65, 0.3), 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 5px rgba(0, 255, 65, 0.05);
-}
-.glow-neon-strong {
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.5), 0 0 40px rgba(0, 255, 65, 0.2), 0 0 80px rgba(0, 255, 65, 0.1);
-}
-.glow-neon-text {
-  text-shadow: 0 0 10px rgba(0, 255, 65, 0.5), 0 0 30px rgba(0, 255, 65, 0.3);
-}
-
-/* === GLASSMORPHISM CARD === */
+/* === GLASSMORPHISM SURFACES === */
 .glass-card {
-  background: rgba(10, 10, 10, 0.85);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 255, 65, 0.15);
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
 }
 .glass-card:hover {
-  border-color: rgba(0, 255, 65, 0.3);
-  box-shadow: 0 0 20px rgba(0, 255, 65, 0.08);
+  transform: translateY(-2px);
+  border-color: rgba(0, 255, 65, 0.1);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.06), 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+.glass-card-static {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
 }
 
-/* === NEON BUTTON === */
+/* === GLOW UTILITIES === */
+.glow-neon {
+  box-shadow: 0 0 5px rgba(0, 255, 65, 0.2), 0 0 20px rgba(0, 255, 65, 0.08);
+}
+.glow-neon-strong {
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.4), 0 0 40px rgba(0, 255, 65, 0.15), 0 0 80px rgba(0, 255, 65, 0.05);
+}
+.glow-neon-text {
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.4), 0 0 24px rgba(0, 255, 65, 0.2);
+}
+
+/* === BUTTONS === */
 .btn-neon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid #00FF41;
+  border: 1px solid rgba(0, 255, 65, 0.3);
   color: #00FF41;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   padding: 10px 24px;
   cursor: pointer;
   position: relative;
   overflow: hidden;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
+  border-radius: 8px;
+  letter-spacing: 0.01em;
 }
 .btn-neon:hover {
-  background: rgba(0, 255, 65, 0.1);
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.3), 0 0 30px rgba(0, 255, 65, 0.1);
+  background: rgba(0, 255, 65, 0.06);
+  border-color: rgba(0, 255, 65, 0.5);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.15);
+  transform: translateY(-1px);
 }
 
 .btn-neon-filled {
@@ -138,50 +149,51 @@ body {
   background: #00FF41;
   border: 1px solid #00FF41;
   color: #000000;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   padding: 10px 24px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   font-size: 13px;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  border-radius: 8px;
+  letter-spacing: 0.01em;
 }
 .btn-neon-filled:hover {
   background: #33ff66;
-  box-shadow: 0 0 15px rgba(0, 255, 65, 0.5), 0 0 30px rgba(0, 255, 65, 0.2);
+  box-shadow: 0 0 20px rgba(0, 255, 65, 0.4), 0 0 40px rgba(0, 255, 65, 0.15);
+  transform: translateY(-1px);
 }
 
-/* Mobile button sizing */
 @media (max-width: 640px) {
   .btn-neon, .btn-neon-filled {
     padding: 10px 16px;
-    font-size: 11px;
-    letter-spacing: 0.5px;
+    font-size: 12px;
   }
 }
 
-/* === INPUT STYLES === */
+/* === INPUT === */
 .input-neon {
-  background: rgba(5, 5, 5, 0.9);
-  border: 1px solid rgba(0, 255, 65, 0.2);
-  color: #e0e0e0;
-  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #f0f0f0;
+  font-family: var(--font-sans);
   padding: 12px 16px;
   font-size: 14px;
   outline: none;
   transition: all 0.3s ease;
   width: 100%;
+  border-radius: 8px;
 }
-.input-neon::placeholder { color: #555555; }
+.input-neon::placeholder { color: #444444; }
 .input-neon:focus {
-  border-color: #00FF41;
-  box-shadow: 0 0 10px rgba(0, 255, 65, 0.2), inset 0 0 5px rgba(0, 255, 65, 0.05);
+  border-color: rgba(0, 255, 65, 0.4);
+  box-shadow: 0 0 0 3px rgba(0, 255, 65, 0.08);
+  background: rgba(255, 255, 255, 0.04);
 }
 
-/* === MATRIX RAIN CANVAS === */
+/* === MATRIX RAIN === */
 .matrix-rain-container {
   position: fixed;
   top: 0;
@@ -190,16 +202,35 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 0;
-  opacity: 0.06;
+  opacity: 0.04;
 }
 
 /* === ANIMATIONS === */
 @keyframes pulse-neon {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(0, 255, 65, 0.6); }
+  50% { opacity: 0.4; box-shadow: 0 0 2px rgba(0, 255, 65, 0.2); }
 }
 .animate-pulse-neon {
-  animation: pulse-neon 2s ease-in-out infinite;
+  animation: pulse-neon 2.5s ease-in-out infinite;
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.animate-pulse-soft {
+  animation: pulse-soft 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, rgba(255,255,255,0.02) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  border-radius: 8px;
 }
 
 @keyframes blink {
@@ -208,6 +239,14 @@ body {
 }
 .cursor-blink {
   animation: blink 1s step-end infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 65, 0.3), 0 0 24px rgba(0, 255, 65, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(0, 255, 65, 0.5), 0 0 48px rgba(0, 255, 65, 0.2); }
+}
+.animate-glow-pulse {
+  animation: glow-pulse 3s ease-in-out infinite;
 }
 
 /* === STATUS INDICATORS === */
@@ -222,42 +261,44 @@ body {
   background: #00FF41;
   box-shadow: 0 0 6px rgba(0, 255, 65, 0.6);
 }
-.status-inactive { background: #555555; }
+.status-inactive { background: #333333; }
 .status-blocked {
-  background: #ff3333;
-  box-shadow: 0 0 6px rgba(255, 51, 51, 0.6);
+  background: #ff4444;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.6);
 }
 
-/* === TABLE STYLES === */
+/* === TABLE === */
 .table-neon { width: 100%; border-collapse: collapse; }
 .table-neon th {
   text-align: left;
   padding: 12px 16px;
-  font-family: var(--font-mono);
+  font-family: var(--font-sans);
   font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  color: #00FF41;
-  border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+  letter-spacing: 0.05em;
+  color: #666666;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   white-space: nowrap;
 }
 .table-neon td {
-  padding: 10px 16px;
+  padding: 12px 16px;
   font-size: 13px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
   font-family: var(--font-mono);
+  color: #a0a0a0;
 }
 .table-neon tr:hover td {
-  background: rgba(0, 255, 65, 0.03);
+  background: rgba(255, 255, 255, 0.015);
 }
 
-/* === SCANLINE EFFECT === */
+/* === SCANLINE (very subtle) === */
 .scanline { position: relative; overflow: hidden; }
 .scanline::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 65, 0.02) 2px, rgba(0, 255, 65, 0.02) 4px);
+  background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255, 255, 255, 0.008) 3px, rgba(255, 255, 255, 0.008) 6px);
   pointer-events: none;
   z-index: 1;
 }

@@ -8,19 +8,51 @@ import {
   CheckCircle2,
   Globe,
   Activity,
-  TrendingUp,
-  Eye,
-  Cpu,
   Clock,
   Copy,
   Check,
-  Loader2
+  Loader2,
+  TrendingUp,
+  Eye,
+  Cpu,
+  ArrowUpRight,
+  Ban,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
+/* ==================== SKELETON LOADERS ==================== */
+function MetricSkeleton() {
+  return (
+    <div className="glass-card-static p-5">
+      <div className="flex items-center justify-between mb-4">
+        <div className="skeleton w-9 h-9 rounded-lg" />
+        <div className="skeleton w-14 h-4 rounded" />
+      </div>
+      <div className="skeleton w-20 h-8 rounded mb-2" />
+      <div className="skeleton w-28 h-3 rounded" />
+    </div>
+  );
+}
+
+function TableSkeleton() {
+  return (
+    <div className="space-y-3 p-5">
+      {[...Array(5)].map((_, i) => (
+        <div key={i} className="flex gap-4 items-center">
+          <div className="skeleton w-28 h-4 rounded" />
+          <div className="skeleton w-20 h-4 rounded" />
+          <div className="skeleton flex-1 h-4 rounded" />
+          <div className="skeleton w-16 h-4 rounded" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ==================== MAIN PAGE ==================== */
 export default function DashboardPage() {
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
-  const [apiKey, setApiKey] = useState("Carregando...");
+  const [apiKey, setApiKey] = useState("");
   const [loading, setLoading] = useState(true);
 
   const [stats, setStats] = useState({
@@ -29,7 +61,7 @@ export default function DashboardPage() {
     domains: 0,
     uptime: "100%",
   });
-  
+
   const [recentThreats, setRecentThreats] = useState<any[]>([]);
 
   const fetchDashboardData = useCallback(async () => {
@@ -43,7 +75,7 @@ export default function DashboardPage() {
       .select("api_key")
       .eq("id", user.id)
       .single();
-      
+
     if (profile) {
       setApiKey(profile.api_key);
     }
@@ -74,7 +106,7 @@ export default function DashboardPage() {
         if (log.action === "blocked") blocked++;
         if (log.action === "allowed" || log.action === "bypassed") allowed++;
       });
-      setRecentThreats(logs.slice(0, 5));
+      setRecentThreats(logs.slice(0, 6));
     }
 
     setStats({
@@ -97,221 +129,236 @@ export default function DashboardPage() {
     setTimeout(() => setApiKeyCopied(false), 2000);
   };
 
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (diffInSeconds < 60) return `${diffInSeconds}s`;
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m`;
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h`;
+    return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "short" });
+  };
+
+  const blockRate = stats.blocked + stats.allowed > 0
+    ? Math.round((stats.blocked / (stats.blocked + stats.allowed)) * 100)
+    : 0;
+
   const statCards = [
     {
       label: "Ameaças Bloqueadas",
       value: stats.blocked,
-      icon: Shield,
-      color: "text-danger",
-      bgColor: "bg-danger/10",
-      borderColor: "border-danger/30",
+      icon: Ban,
+      accentColor: "text-danger",
+      accentBg: "bg-danger/8",
+      change: `${blockRate}% taxa`,
     },
     {
       label: "Acessos Legítimos",
       value: stats.allowed,
       icon: CheckCircle2,
-      color: "text-neon",
-      bgColor: "bg-neon/10",
-      borderColor: "border-neon/30",
+      accentColor: "text-neon",
+      accentBg: "bg-neon/8",
+      change: "verificados",
     },
     {
       label: "Domínios Ativos",
       value: stats.domains,
       icon: Globe,
-      color: "text-neon",
-      bgColor: "bg-neon/10",
-      borderColor: "border-neon/30",
+      accentColor: "text-blue-400",
+      accentBg: "bg-blue-400/8",
+      change: "protegidos",
     },
     {
       label: "Uptime",
       value: stats.uptime,
       icon: Activity,
-      color: "text-neon",
-      bgColor: "bg-neon/10",
-      borderColor: "border-neon/30",
+      accentColor: "text-neon",
+      accentBg: "bg-neon/8",
+      change: "operacional",
     },
   ];
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <Loader2 className="w-8 h-8 text-neon animate-spin" />
-      </div>
-    );
-  }
-
-  // Format date helper
-  const formatTimeAgo = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
-    if (diffInSeconds < 60) return `${diffInSeconds} seg atrás`;
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    if (diffInMinutes < 60) return `${diffInMinutes} min atrás`;
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    if (diffInHours < 24) return `${diffInHours} horas atrás`;
-    return date.toLocaleDateString();
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-[1400px]">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="font-mono text-xl font-bold text-white">
-            <span className="text-neon">&gt;</span> Shield Overview
+          <h1 className="text-xl font-semibold text-white tracking-tight">
+            Shield Overview
           </h1>
           <p className="text-text-muted text-sm mt-1">
             Monitoramento em tempo real da sua proteção
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-neon/[0.05] border border-neon/10">
           <span className="status-dot status-active animate-pulse-neon" />
-          <span className="font-mono text-neon text-xs">LIVE</span>
+          <span className="text-neon text-[11px] font-semibold tracking-wide font-mono">LIVE</span>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className={`glass-card p-5 rounded-sm border ${stat.borderColor}`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 ${stat.bgColor} flex items-center justify-center rounded-sm`}>
-                <stat.icon className={`w-4 h-4 ${stat.color}`} />
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <MetricSkeleton key={i} />)}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {statCards.map((stat, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="glass-card p-5"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-9 h-9 ${stat.accentBg} flex items-center justify-center rounded-lg`}>
+                  <stat.icon className={`w-[18px] h-[18px] ${stat.accentColor}`} />
+                </div>
+                <span className="text-[11px] text-text-muted font-medium">{stat.change}</span>
               </div>
-            </div>
-            <div className="font-mono text-2xl font-bold text-white">
-              {stat.value.toLocaleString()}
-            </div>
-            <div className="text-text-muted text-xs mt-1">{stat.label}</div>
-          </motion.div>
-        ))}
-      </div>
+              <div className="font-mono text-2xl font-bold text-white tracking-tight">
+                {typeof stat.value === "number" ? stat.value.toLocaleString() : stat.value}
+              </div>
+              <div className="text-text-muted text-[13px] mt-1 font-medium">{stat.label}</div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {/* Main Grid */}
-      <div className="grid lg:grid-cols-3 gap-6">
+      <div className="grid lg:grid-cols-3 gap-5">
         {/* Recent Threats */}
-        <div className="lg:col-span-2 glass-card rounded-sm">
-          <div className="p-4 border-b border-border-neon flex items-center gap-2">
-            <AlertTriangle className="w-4 h-4 text-danger" />
-            <span className="font-mono text-sm font-semibold text-white">
-              Ameaças Recentes
-            </span>
-            <span className="ml-auto font-mono text-[10px] text-text-muted">
-              Últimos Logs
-            </span>
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-2 glass-card-static overflow-hidden"
+        >
+          <div className="px-5 py-4 border-b border-white/[0.04] flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <AlertTriangle className="w-4 h-4 text-danger" />
+              <span className="text-sm font-semibold text-white">Ameaças Recentes</span>
+            </div>
+            <span className="text-[11px] text-text-muted font-medium">Últimos eventos</span>
           </div>
-          <div className="overflow-x-auto">
-            <table className="table-neon">
-              <thead>
-                <tr>
-                  <th>IP Address</th>
-                  <th>Tipo</th>
-                  <th>Domínio</th>
-                  <th>Tempo</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentThreats.length > 0 ? (
-                  recentThreats.map((threat, i) => (
-                    <motion.tr
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                    >
-                      <td className="text-text-secondary">{threat.ip_address}</td>
-                      <td>
-                        <span
-                          className={
-                            threat.threat_type === "Bot" || threat.threat_type === "Crawler Bypass" || threat.action === "allowed"
-                              ? "text-neon"
-                              : "text-danger"
-                          }
-                        >
-                          {threat.threat_type || "Acesso Direto"}
-                        </span>
-                      </td>
-                      <td className="text-text-muted">{threat.domains?.domain_url || "Desconhecido"}</td>
-                      <td>
-                        <span className="flex items-center gap-1 text-text-muted">
-                          <Clock className="w-3 h-3" />
-                          {formatTimeAgo(threat.created_at)}
-                        </span>
-                      </td>
-                      <td>
-                        <span
-                          className={`px-2 py-0.5 text-[10px] font-bold font-mono uppercase ${
-                            threat.action === "blocked"
-                              ? "bg-danger/20 text-danger"
-                              : "bg-neon/20 text-neon"
-                          }`}
-                        >
-                          {threat.action}
-                        </span>
-                      </td>
-                    </motion.tr>
-                  ))
-                ) : (
+
+          {loading ? (
+            <TableSkeleton />
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-neon">
+                <thead>
                   <tr>
-                    <td colSpan={5} className="text-center py-8 text-text-muted font-mono text-xs">
-                      Nenhuma ameaça registrada ainda. Seu escudo está limpo.
-                    </td>
+                    <th>IP</th>
+                    <th>Ameaça</th>
+                    <th>Domínio</th>
+                    <th>Tempo</th>
+                    <th>Status</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                </thead>
+                <tbody>
+                  {recentThreats.length > 0 ? (
+                    recentThreats.map((threat, i) => (
+                      <motion.tr
+                        key={i}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.35 + i * 0.04 }}
+                      >
+                        <td className="font-mono text-[12px]">{threat.ip_address}</td>
+                        <td>
+                          <span
+                            className={`text-[12px] font-medium ${
+                              threat.action === "blocked" ? "text-danger" : "text-neon"
+                            }`}
+                          >
+                            {threat.threat_type || "Direto"}
+                          </span>
+                        </td>
+                        <td className="text-text-muted text-[12px]">
+                          {threat.domains?.domain_url || "—"}
+                        </td>
+                        <td>
+                          <span className="text-text-muted text-[12px] font-mono">
+                            {formatTimeAgo(threat.created_at)}
+                          </span>
+                        </td>
+                        <td>
+                          <span
+                            className={`inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-md ${
+                              threat.action === "blocked"
+                                ? "bg-danger/10 text-danger"
+                                : "bg-neon/10 text-neon"
+                            }`}
+                          >
+                            {threat.action === "blocked" ? "Blocked" : "Allowed"}
+                          </span>
+                        </td>
+                      </motion.tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={5} className="text-center py-12 text-text-muted text-sm">
+                        Nenhuma ameaça registrada. Seu escudo está limpo.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </motion.div>
 
         {/* Info Column */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-5">
           {/* Status Panel */}
-          <div className="glass-card rounded-sm">
-            <div className="p-4 border-b border-border-neon flex items-center gap-2">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="glass-card-static overflow-hidden"
+          >
+            <div className="px-5 py-4 border-b border-white/[0.04] flex items-center gap-2.5">
               <Eye className="w-4 h-4 text-neon" />
-              <span className="font-mono text-sm font-semibold text-white">
-                Status do Sistema
-              </span>
+              <span className="text-sm font-semibold text-white">Status do Sistema</span>
             </div>
             <div className="p-6 text-center">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon/10 border border-neon/30 mb-4">
-                <Shield className="w-8 h-8 text-neon" />
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-neon/[0.06] border border-neon/15 mb-4 animate-glow-pulse">
+                <Shield className="w-7 h-7 text-neon" />
               </div>
-              <h3 className="font-mono font-bold text-white mb-1">Proteção Ativa</h3>
-              <p className="text-xs text-text-muted">
-                Seus funis estão blindados contra tráfego fraudulento.
+              <h3 className="font-semibold text-white mb-1.5">Proteção Ativa</h3>
+              <p className="text-[13px] text-text-muted leading-relaxed">
+                Seus funis estão blindados contra tráfego fraudulento e espionagem.
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick API Key */}
-          <div className="glass-card rounded-sm">
-            <div className="p-4 border-b border-border-neon flex items-center gap-2">
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="glass-card-static overflow-hidden"
+          >
+            <div className="px-5 py-4 border-b border-white/[0.04] flex items-center gap-2.5">
               <Cpu className="w-4 h-4 text-neon" />
-              <span className="font-mono text-sm font-semibold text-white">
-                Sua API Key
-              </span>
+              <span className="text-sm font-semibold text-white">Sua API Key</span>
             </div>
-            <div className="p-4">
-              <p className="text-xs text-text-muted mb-3">
-                Use esta chave para autenticar suas integrações e webhooks.
+            <div className="p-5">
+              <p className="text-[13px] text-text-muted mb-3.5 leading-relaxed">
+                Use esta chave para autenticar suas integrações.
               </p>
               <div className="flex items-center gap-2">
-                <code className="flex-1 bg-bg-secondary p-2 font-mono text-[10px] sm:text-xs text-text-secondary truncate border border-border-neon">
-                  {apiKey}
+                <code className="flex-1 bg-white/[0.02] px-3 py-2.5 font-mono text-[11px] text-text-secondary truncate border border-white/[0.06] rounded-lg">
+                  {apiKey || "Carregando..."}
                 </code>
                 <button
                   onClick={copyApiKey}
-                  className="p-2 border border-border-neon hover:border-neon transition-colors shrink-0"
+                  className="p-2.5 rounded-lg border border-white/[0.06] hover:border-neon/20 hover:bg-neon/[0.04] transition-all shrink-0"
                   title="Copiar API Key"
                   id="copy-api-key"
                 >
@@ -323,7 +370,7 @@ export default function DashboardPage() {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
