@@ -26,6 +26,7 @@ interface Domain {
   status: string;
   shield_enabled: boolean;
   checkout_url: string | null;
+  vsl_url: string | null;
   created_at: string;
 }
 
@@ -40,6 +41,7 @@ export default function DomainsPage() {
   const [showScriptForDomain, setShowScriptForDomain] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<string>("starter");
   const [newCheckoutUrl, setNewCheckoutUrl] = useState("");
+  const [newVslUrl, setNewVslUrl] = useState("");
 
   const fetchDomains = useCallback(async () => {
     const supabase = createClient();
@@ -83,9 +85,10 @@ export default function DomainsPage() {
         domain_url: newDomain.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""),
         status: "pending",
       };
-      // Enterprise: include checkout URL if provided
-      if (userPlan === "enterprise" && newCheckoutUrl.trim()) {
-        insertData.checkout_url = newCheckoutUrl.trim();
+      // Enterprise: include checkout URL and VSL URL if provided
+      if (userPlan === "enterprise") {
+        if (newCheckoutUrl.trim()) insertData.checkout_url = newCheckoutUrl.trim();
+        if (newVslUrl.trim()) insertData.vsl_url = newVslUrl.trim();
       }
 
       const { error: insertError } = await supabase.from("domains").insert(insertData);
@@ -97,6 +100,7 @@ export default function DomainsPage() {
 
       setNewDomain("");
       setNewCheckoutUrl("");
+      setNewVslUrl("");
       setShowAddModal(false);
       fetchDomains();
     } catch {
@@ -125,10 +129,13 @@ export default function DomainsPage() {
 
   const updateCheckoutUrl = async (id: string, url: string) => {
     const supabase = createClient();
-    await supabase
-      .from("domains")
-      .update({ checkout_url: url || null })
-      .eq("id", id);
+    await supabase.from("domains").update({ checkout_url: url || null }).eq("id", id);
+    fetchDomains();
+  };
+
+  const updateVslUrl = async (id: string, url: string) => {
+    const supabase = createClient();
+    await supabase.from("domains").update({ vsl_url: url || null }).eq("id", id);
     fetchDomains();
   };
 
@@ -323,29 +330,43 @@ export default function DomainsPage() {
                 </div>
               </div>
 
-              {/* Enterprise: Checkout URL Hijack Config */}
+              {/* Enterprise: Advanced Features Config */}
               {userPlan === "enterprise" && (
-                <div className="mt-4 pt-4 border-t border-border-neon/30">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Crown className="w-3 h-3 text-yellow-500" />
-                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Retaliação de Clone — Enterprise</span>
-                  </div>
+                <div className="mt-4 pt-4 border-t border-border-neon/30 space-y-4">
                   <div className="flex items-center gap-2">
-                    <Link className="w-3 h-3 text-text-muted shrink-0" />
-                    <input
-                      type="text"
-                      defaultValue={domain.checkout_url || ""}
-                      placeholder="https://pay.hotmart.com/seu-link"
-                      className="input-neon text-xs flex-1"
-                      onBlur={(e) => updateCheckoutUrl(domain.id, e.target.value)}
-                    />
-                    <Zap className={`w-4 h-4 shrink-0 ${domain.checkout_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
+                    <Crown className="w-3 h-3 text-yellow-500" />
+                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Arsenal Enterprise</span>
                   </div>
-                  <p className="font-mono text-[9px] text-text-muted mt-1">
-                    {domain.checkout_url 
-                      ? "✓ Armadilha ativa: clones deste domínio terão seus botões de compra redirecionados para o seu checkout."
-                      : "Cole seu link de checkout (Hotmart, Kiwify, etc). Se alguém clonar sua página, as vendas cairão na SUA conta."}
-                  </p>
+                  
+                  {/* Checkout URL Hijack */}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Link className="w-3 h-3 text-text-muted shrink-0" />
+                      <input
+                        type="text"
+                        defaultValue={domain.checkout_url || ""}
+                        placeholder="Link de Retaliação (Ex: pay.hotmart.com)"
+                        className="input-neon text-xs flex-1"
+                        onBlur={(e) => updateCheckoutUrl(domain.id, e.target.value)}
+                      />
+                      <Zap className={`w-4 h-4 shrink-0 ${domain.checkout_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
+                    </div>
+                  </div>
+
+                  {/* VSL URL Dynamic Injection */}
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-3 h-3 text-text-muted shrink-0" />
+                      <input
+                        type="text"
+                        defaultValue={domain.vsl_url || ""}
+                        placeholder="Iframe VSL Oculto (Opcional)"
+                        className="input-neon text-xs flex-1"
+                        onBlur={(e) => updateVslUrl(domain.id, e.target.value)}
+                      />
+                      <Zap className={`w-4 h-4 shrink-0 ${domain.vsl_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
+                    </div>
+                  </div>
                 </div>
               )}
             </motion.div>
@@ -405,24 +426,35 @@ export default function DomainsPage() {
                 </p>
               </div>
 
-              {/* Enterprise: Checkout URL field */}
+              {/* Enterprise: Advanced fields */}
               {userPlan === "enterprise" && (
-                <div className="mb-4">
-                  <label className="font-mono text-xs uppercase tracking-wider mb-2 flex items-center gap-2">
+                <div className="space-y-4 mb-4 border border-yellow-500/30 p-4 rounded-sm bg-yellow-500/5">
+                  <div className="flex items-center gap-2">
                     <Crown className="w-3 h-3 text-yellow-500" />
-                    <span className="text-yellow-500">Link de Checkout (Retaliação)</span>
-                  </label>
-                  <input
-                    type="text"
-                    value={newCheckoutUrl}
-                    onChange={(e) => setNewCheckoutUrl(e.target.value)}
-                    placeholder="https://pay.hotmart.com/seu-link"
-                    className="input-neon"
-                    id="checkout-url-input"
-                  />
-                  <p className="font-mono text-[10px] mt-2 text-yellow-500/70">
-                    Se alguém clonar este domínio, os botões de compra da página clonada serão silenciosamente substituídos pelo SEU link.
-                  </p>
+                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Arsenal Enterprise</span>
+                  </div>
+                  
+                  <div>
+                    <label className="font-mono text-[10px] text-text-muted mb-1 block">Link de Retaliação (Checkout)</label>
+                    <input
+                      type="text"
+                      value={newCheckoutUrl}
+                      onChange={(e) => setNewCheckoutUrl(e.target.value)}
+                      placeholder="Ex: https://pay.hotmart.com/..."
+                      className="input-neon"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="font-mono text-[10px] text-text-muted mb-1 block">Iframe VSL Oculto (Dinâmico)</label>
+                    <input
+                      type="text"
+                      value={newVslUrl}
+                      onChange={(e) => setNewVslUrl(e.target.value)}
+                      placeholder='Ex: <iframe src="https://vturb...'>
+                      className="input-neon"
+                    />
+                  </div>
                 </div>
               )}
 
@@ -491,53 +523,55 @@ export default function DomainsPage() {
               <div className="relative">
                 <pre className="bg-black border border-border-neon p-4 rounded-sm overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed">
 {`<script>
-  (async function() {
+  /* AkkaRabbit Secure Core v2.0 - Do not modify */
+  (async function(){
+    let h=0; window.addEventListener('mousemove',()=>h++); window.addEventListener('touchstart',()=>h++);
     try {
       const res = await fetch('https://${typeof window !== 'undefined' ? window.location.host : 'seusite.com'}/api/v1/shield', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': 'COLE_SUA_API_KEY_AQUI' 
-        },
-        body: JSON.stringify({ domain: window.location.hostname })
+        method:'POST', headers:{'Content-Type':'application/json','x-api-key':'COLE_SUA_API_KEY_AQUI'},
+        body:JSON.stringify({domain:window.location.hostname})
       });
-      const data = await res.json();
-      if (data.blocked) {
-        window.location.href = 'https://ta-indo-aonde-show.vercel.app/';
-        return;
+      const d = await res.json();
+      if(d.blocked) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
+
+      // 1. Watermark IP (Invisible)
+      if(d.ip) {
+        const c=document.createElement('canvas');c.width=200;c.height=100;const ctx=c.getContext('2d');
+        ctx.fillStyle='rgba(0,0,0,0.01)';ctx.font='10px Arial';ctx.fillText(d.ip+'|'+window.location.hostname,10,50);
+        const st=document.createElement('style');st.innerHTML='body::after{content:"";position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:99999;background-image:url('+c.toDataURL()+');}';
+        document.head.appendChild(st);
       }
 
-      // [ENTERPRISE] Botão Morto: injeta o link real nos botões vazios
-      if (data.inject_checkout && data.checkout_url) {
-        document.querySelectorAll('[data-akka="buy"]').forEach(function(el) {
-          if (el.tagName === 'A') el.href = data.checkout_url;
-          el.addEventListener('click', function(e) {
-            if (el.tagName !== 'A') {
-              e.preventDefault();
-              window.location.href = data.checkout_url;
-            }
+      // 2. Dynamic VSL
+      if(d.vsl_url) {
+        document.querySelectorAll('[data-akka="vsl"]').forEach(el=>el.innerHTML=d.vsl_url);
+      }
+
+      // 3. Dead Button Injection (with Behavioral check)
+      if(d.inject_checkout && d.checkout_url) {
+        document.querySelectorAll('[data-akka="buy"]').forEach(el=>{
+          if(el.tagName==='A') el.href=d.checkout_url;
+          el.addEventListener('click',e=>{
+            if(h<2){e.preventDefault();alert('Security check failed.');return;}
+            if(el.tagName!=='A'){e.preventDefault();window.location.href=d.checkout_url;}
           });
         });
       }
 
-      // [ENTERPRISE] Retaliação: sequestra clones (só ativa em domínios piratas)
-      if (data.hijack && data.checkout_url) {
-        document.querySelectorAll('a[href]').forEach(function(el) {
-          if (/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) {
-            el.href = data.checkout_url;
-          }
+      // 4. Retaliation Hijack
+      if(d.hijack && d.checkout_url) {
+        document.querySelectorAll('a[href]').forEach(el=>{
+          if(/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) el.href=d.checkout_url;
         });
-        document.addEventListener('click', function(e) {
-          var t = e.target.closest('button, a, [role="button"]');
-          if (!t) return;
-          var txt = (t.innerText||t.id||t.className||'').toLowerCase();
-          if (/comprar|pix|checkout|pagar|finalizar|carrinho/i.test(txt)) {
-            e.preventDefault(); e.stopPropagation();
-            window.location.href = data.checkout_url;
+        document.addEventListener('click',e=>{
+          let t=e.target.closest('button, a, [role="button"]');
+          if(!t)return; let txt=(t.innerText||t.id||t.className||'').toLowerCase();
+          if(/comprar|pix|checkout|pagar|finalizar|carrinho/i.test(txt)){
+            e.preventDefault();e.stopPropagation();window.location.href=d.checkout_url;
           }
-        }, true);
+        },true);
       }
-    } catch(e) {}
+    }catch(e){}
   })();
 </script>`}
                 </pre>

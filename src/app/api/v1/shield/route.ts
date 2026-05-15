@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
     // Find domain record — search ALL domains for this user to find checkout_url for hijack
     const { data: domainData } = await supabase
       .from("domains")
-      .select("id, shield_enabled, status, checkout_url")
+      .select("id, shield_enabled, status, checkout_url, vsl_url")
       .eq("user_id", userData.id)
       .eq("domain_url", domain)
       .single();
@@ -284,12 +284,18 @@ export async function POST(request: NextRequest) {
       blocked: false,
       token,
       expiresIn: 15,
+      ip: ip, // For watermarking
     };
 
-    // Enterprise: deliver checkout_url so the script can inject links into "dead buttons"
-    if (userData.plan_tier === "enterprise" && domainData.checkout_url) {
-      response.inject_checkout = true;
-      response.checkout_url = domainData.checkout_url;
+    // Enterprise: deliver checkout_url and vsl_url
+    if (userData.plan_tier === "enterprise") {
+      if (domainData.checkout_url) {
+        response.inject_checkout = true;
+        response.checkout_url = domainData.checkout_url;
+      }
+      if (domainData.vsl_url) {
+        response.vsl_url = domainData.vsl_url;
+      }
     }
 
     return NextResponse.json(response);
