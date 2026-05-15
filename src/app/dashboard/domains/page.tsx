@@ -135,6 +135,37 @@ export default function DomainsPage() {
         </button>
       </div>
 
+      {/* Tutorial Banner */}
+      <div className="glass-card rounded-sm p-5 border-border-neon/50 bg-bg-secondary/30">
+        <h3 className="font-mono text-white text-sm font-bold flex items-center gap-2 mb-4">
+          <AlertCircle className="w-4 h-4 text-neon" />
+          Como blindar suas páginas (Passo a Passo)
+        </h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">1</div>
+            <p className="font-mono text-xs text-white font-semibold">Cadastre o Domínio</p>
+            <p className="text-text-muted text-[11px] leading-relaxed">
+              Clique em "Adicionar Domínio" acima e insira a URL onde sua Landing Page ou VSL está hospedada (ex: oferta.com).
+            </p>
+          </div>
+          <div className="space-y-2">
+            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">2</div>
+            <p className="font-mono text-xs text-white font-semibold">Copie o Script</p>
+            <p className="text-text-muted text-[11px] leading-relaxed">
+              Após adicionar, clique no ícone de "Copiar" (<Copy className="inline w-3 h-3 mx-0.5" />) ao lado do Token para visualizar o código do seu Escudo.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">3</div>
+            <p className="font-mono text-xs text-white font-semibold">Cole no seu Site</p>
+            <p className="text-text-muted text-[11px] leading-relaxed">
+              Cole o código dentro da tag <code className="text-neon">&lt;head&gt;</code> do seu site. A partir deste momento, o AkkaRabbit bloqueará espiões e robôs em tempo real!
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Domain List */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
