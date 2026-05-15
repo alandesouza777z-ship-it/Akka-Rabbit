@@ -27,6 +27,10 @@ interface Domain {
   shield_enabled: boolean;
   checkout_url: string | null;
   vsl_url: string | null;
+  safe_page_url: string | null;
+  cloak_bots: boolean;
+  honeypot_enabled: boolean;
+  canvas_fingerprint: boolean;
   created_at: string;
 }
 
@@ -136,6 +140,30 @@ export default function DomainsPage() {
   const updateVslUrl = async (id: string, url: string) => {
     const supabase = createClient();
     await supabase.from("domains").update({ vsl_url: url || null }).eq("id", id);
+    fetchDomains();
+  };
+
+  const toggleCloakBots = async (id: string, enabled: boolean) => {
+    const supabase = createClient();
+    await supabase.from("domains").update({ cloak_bots: !enabled }).eq("id", id);
+    fetchDomains();
+  };
+
+  const updateSafePageUrl = async (id: string, url: string) => {
+    const supabase = createClient();
+    await supabase.from("domains").update({ safe_page_url: url || null }).eq("id", id);
+    fetchDomains();
+  };
+
+  const toggleHoneypot = async (id: string, enabled: boolean) => {
+    const supabase = createClient();
+    await supabase.from("domains").update({ honeypot_enabled: !enabled }).eq("id", id);
+    fetchDomains();
+  };
+
+  const toggleCanvasFingerprint = async (id: string, enabled: boolean) => {
+    const supabase = createClient();
+    await supabase.from("domains").update({ canvas_fingerprint: !enabled }).eq("id", id);
     fetchDomains();
   };
 
@@ -367,6 +395,58 @@ export default function DomainsPage() {
                       <Zap className={`w-4 h-4 shrink-0 ${domain.vsl_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
                     </div>
                   </div>
+
+                  {/* MILITARY GRADE CLOAKING */}
+                  <div className="pt-2 mt-2 border-t border-border-neon/10">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-mono text-[10px] text-danger uppercase tracking-wider font-bold">Cloaking (BlackHat)</span>
+                    </div>
+
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleCloakBots(domain.id, domain.cloak_bots)}
+                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.cloak_bots ? 'bg-danger' : 'bg-bg-secondary border border-border-neon'}`}
+                        >
+                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.cloak_bots ? 'translate-x-5' : ''}`} />
+                        </button>
+                        <span className="text-xs font-mono text-text-secondary">Ativar Redirecionamento de Bots</span>
+                      </div>
+
+                      {domain.cloak_bots && (
+                        <div className="flex items-center gap-2 pl-4 border-l border-danger/30">
+                          <Link className="w-3 h-3 text-text-muted shrink-0" />
+                          <input
+                            type="text"
+                            defaultValue={domain.safe_page_url || ""}
+                            placeholder="URL da Página Safe (Branca)"
+                            className="input-neon text-xs flex-1"
+                            onBlur={(e) => updateSafePageUrl(domain.id, e.target.value)}
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleHoneypot(domain.id, domain.honeypot_enabled)}
+                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.honeypot_enabled ? 'bg-neon' : 'bg-bg-secondary border border-border-neon'}`}
+                        >
+                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.honeypot_enabled ? 'translate-x-5' : ''}`} />
+                        </button>
+                        <span className="text-xs font-mono text-text-secondary">Armadilhas Invisíveis (Honeypot)</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => toggleCanvasFingerprint(domain.id, domain.canvas_fingerprint)}
+                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.canvas_fingerprint ? 'bg-neon' : 'bg-bg-secondary border border-border-neon'}`}
+                        >
+                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.canvas_fingerprint ? 'translate-x-5' : ''}`} />
+                        </button>
+                        <span className="text-xs font-mono text-text-secondary">Canvas Fingerprinting (GPU)</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
             </motion.div>
@@ -526,13 +606,21 @@ export default function DomainsPage() {
   /* AkkaRabbit Secure Core v2.0 - Do not modify */
   (async function(){
     let h=0; window.addEventListener('mousemove',()=>h++); window.addEventListener('touchstart',()=>h++);
+    
+    // Canvas Fingerprint generation
+    let cv="none";
+    try{const c=document.createElement('canvas');const ctx=c.getContext('2d');ctx.fillText('AkkaRabbit',-20,0);cv=c.toDataURL().slice(-50);}catch(e){}
+
     try {
       const res = await fetch('https://${typeof window !== 'undefined' ? window.location.host : 'seusite.com'}/api/v1/shield', {
         method:'POST', headers:{'Content-Type':'application/json','x-api-key':'COLE_SUA_API_KEY_AQUI'},
-        body:JSON.stringify({domain:window.location.hostname})
+        body:JSON.stringify({domain:window.location.hostname, cv:cv})
       });
       const d = await res.json();
       if(d.blocked) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
+      
+      // Cloaking Redirect (Safe Page)
+      if(d.hijack && d.safe_page) { window.location.replace(d.safe_page); return; }
 
       // 1. Watermark IP (Invisible)
       if(d.ip) {

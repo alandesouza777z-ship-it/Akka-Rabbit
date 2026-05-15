@@ -87,12 +87,17 @@ async function logEvent(
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { domain, turnstile_token } = body;
+    const { domain, turnstile_token, cv } = body;
     const ip =
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       request.headers.get("x-real-ip") ||
       "0.0.0.0";
     const userAgent = request.headers.get("user-agent") || "";
+    
+    // Advanced Datacenter / IP Checks (Mock for proxy/VPN detection logic)
+    // In a real military grade system we'd check against an ASN DB (like MaxMind)
+    // Or check for suspicious headers typical of VPNs/Proxies.
+    const isSuspiciousProxy = request.headers.has("x-forwarded-for") && request.headers.get("x-forwarded-for")?.includes(",");
     const apiKey = request.headers.get("x-api-key") || "";
 
     if (!domain) {
@@ -120,7 +125,7 @@ export async function POST(request: NextRequest) {
     // Find domain record — search ALL domains for this user to find checkout_url for hijack
     const { data: domainData } = await supabase
       .from("domains")
-      .select("id, shield_enabled, status, checkout_url, vsl_url")
+      .select("id, shield_enabled, status, checkout_url, vsl_url, cloak_bots, safe_page_url, honeypot_enabled, canvas_fingerprint")
       .eq("user_id", userData.id)
       .eq("domain_url", domain)
       .single();
@@ -185,9 +190,45 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ blocked: false, bypassed: true });
     }
 
+    // --- MILITARY GRADE CHECKS ---
+    // 1. VPN / Datacenter check
+    if (isSuspiciousProxy) {
+      await logEvent(
+        userData.id,
+        domainData?.id || null,
+        ip,
+        userAgent,
+        "blocked",
+        "Data Center / Proxy"
+      );
+      return NextResponse.json(
+        { blocked: true, reason: "Data center or Proxy detected" },
+        { status: 403 }
+      );
+    }
+
     // 2. Check for verified crawlers (Googlebot, Facebook, etc.)
     const isCrawler = await isVerifiedCrawler(ip, userAgent);
     if (isCrawler) {
+      // CLOAKING MODE (BlackHat): If cloak_bots is enabled, we send them to the Safe Page
+      if (domainData.cloak_bots && domainData.safe_page_url) {
+        await logEvent(
+          userData.id,
+          domainData?.id || null,
+          ip,
+          userAgent,
+          "bypassed",
+          "Cloaking (Bot Redirect)"
+        );
+        return NextResponse.json({
+          blocked: false,
+          hijack: true,
+          safe_page: domainData.safe_page_url,
+          message: "Cloaked crawler sent to safe page",
+        });
+      }
+
+      // Normal mode: just allow the crawler
       await logEvent(
         userData.id,
         domainData?.id || null,
@@ -201,6 +242,22 @@ export async function POST(request: NextRequest) {
         crawler: true,
         message: "Verified crawler allowed",
       });
+    }
+
+    // 2.5 Military Canvas Fingerprinting check
+    if (domainData.canvas_fingerprint && (!cv || cv === "none")) {
+      await logEvent(
+        userData.id,
+        domainData?.id || null,
+        ip,
+        userAgent,
+        "blocked",
+        "Canvas Emulation (Bot)"
+      );
+      return NextResponse.json(
+        { blocked: true, reason: "Hardware fingerprint emulation detected" },
+        { status: 403 }
+      );
     }
 
     // 3. Turnstile validation

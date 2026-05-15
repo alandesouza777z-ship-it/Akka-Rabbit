@@ -33,6 +33,10 @@ CREATE TABLE IF NOT EXISTS public.domains (
   shield_enabled BOOLEAN NOT NULL DEFAULT true,
   checkout_url TEXT DEFAULT NULL,
   vsl_url TEXT DEFAULT NULL,
+  safe_page_url TEXT DEFAULT NULL,
+  cloak_bots BOOLEAN NOT NULL DEFAULT false,
+  honeypot_enabled BOOLEAN NOT NULL DEFAULT false,
+  canvas_fingerprint BOOLEAN NOT NULL DEFAULT false,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
