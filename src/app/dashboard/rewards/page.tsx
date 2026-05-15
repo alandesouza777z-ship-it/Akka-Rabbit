@@ -7,13 +7,9 @@ import {
   Lock,
   CheckCircle2,
   Loader2,
-  Shield,
-  Star,
-  Gem,
-  Crown,
   Sparkles,
-  ArrowRight,
 } from "lucide-react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 
 interface Milestone {
@@ -22,7 +18,7 @@ interface Milestone {
   label: string;
   sublabel: string;
   target: number;
-  icon: React.ElementType;
+  image: string;
   color: string;
   glowColor: string;
   bgGradient: string;
@@ -36,7 +32,7 @@ const milestones: Milestone[] = [
     label: "Membro Emerald",
     sublabel: "10 Milhões de ameaças mitigadas",
     target: 10_000_000,
-    icon: Shield,
+    image: "/plaque-emerald.png",
     color: "text-emerald-400",
     glowColor: "rgba(52, 211, 153, 0.4)",
     bgGradient: "from-emerald-500/10 to-emerald-500/5",
@@ -48,7 +44,7 @@ const milestones: Milestone[] = [
     label: "Membro Ruby",
     sublabel: "25 Milhões de ameaças mitigadas",
     target: 25_000_000,
-    icon: Gem,
+    image: "/plaque-ruby.png",
     color: "text-red-400",
     glowColor: "rgba(248, 113, 113, 0.4)",
     bgGradient: "from-red-500/10 to-red-500/5",
@@ -60,7 +56,7 @@ const milestones: Milestone[] = [
     label: "Membro Gold Rabbit",
     sublabel: "50 Milhões de ameaças mitigadas — Apex Tier",
     target: 50_000_000,
-    icon: Crown,
+    image: "/plaque-gold.png",
     color: "text-amber-400",
     glowColor: "rgba(251, 191, 36, 0.4)",
     bgGradient: "from-amber-500/10 to-amber-500/5",
@@ -239,11 +235,17 @@ export default function RewardsPage() {
                   )}
                 </div>
 
-                {/* Icon */}
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 ${
-                  unlocked ? `bg-gradient-to-b ${milestone.bgGradient}` : "bg-white/[0.03]"
-                } border ${unlocked ? milestone.borderColor : "border-white/[0.06]"}`}>
-                  <milestone.icon className={`w-7 h-7 ${unlocked ? milestone.color : "text-text-muted"}`} />
+                {/* Plaque Image */}
+                <div className={`relative w-full aspect-[4/3] rounded-xl overflow-hidden mb-5 border ${
+                  unlocked ? milestone.borderColor : "border-white/[0.06]"
+                } ${unlocked ? "" : "opacity-60"}`}>
+                  <Image
+                    src={milestone.image}
+                    alt={milestone.label}
+                    fill
+                    className="object-contain p-2"
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                  />
                 </div>
 
                 {/* Info */}
