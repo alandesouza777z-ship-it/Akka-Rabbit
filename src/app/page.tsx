@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield, Zap, Eye, Lock, BarChart3, Globe, ChevronRight,
   Terminal, Cpu, Fingerprint, AlertTriangle, CheckCircle2,
-  ArrowRight, Menu, X,
+  ArrowRight, Menu, X, Rabbit,
 } from "lucide-react";
 import Link from "next/link";
 import MatrixRain from "@/components/MatrixRain";
@@ -74,25 +74,25 @@ export default function LandingPage() {
       <MatrixRain />
 
       {/* ── NAVBAR ── */}
-      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border-neon bg-black/90 backdrop-blur-xl">
+      <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border-subtle bg-black/80 backdrop-blur-2xl">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-14 sm:h-16">
-            <Link href="/" className="flex items-center gap-2 shrink-0">
-              <Shield className="w-6 h-6 sm:w-7 sm:h-7 text-neon" />
-              <span className="font-mono text-neon font-bold text-base sm:text-lg tracking-wider">
-                AKKA<span className="text-white">RABBIT</span>
+          <div className="flex items-center justify-between h-16 sm:h-[72px]">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0">
+              <Rabbit className="w-7 h-7 sm:w-8 sm:h-8 text-emerald" />
+              <span className="font-display text-white font-bold text-lg sm:text-xl tracking-tight">
+                akka<span className="text-emerald">rabbit</span>
               </span>
             </Link>
 
-            <div className="hidden md:flex items-center gap-6 lg:gap-8">
-              <a href="#features" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Features</a>
-              <a href="#how-it-works" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Como Funciona</a>
-              <a href="#pricing" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Preços</a>
-              <Link href="/login" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Login</Link>
-              <Link href="/register" className="btn-neon-filled text-xs py-2 px-4">Começar Grátis</Link>
+            <div className="hidden md:flex items-center gap-8">
+              <a href="#features" className="text-text-secondary hover:text-emerald transition-colors text-sm">Recursos</a>
+              <a href="#how-it-works" className="text-text-secondary hover:text-emerald transition-colors text-sm">Como Funciona</a>
+              <a href="#pricing" className="text-text-secondary hover:text-emerald transition-colors text-sm">Planos</a>
+              <Link href="/login" className="text-text-secondary hover:text-emerald transition-colors text-sm">Entrar</Link>
+              <Link href="/register" className="btn-neon-filled text-sm py-2.5 px-5">Começar Agora</Link>
             </div>
 
-            <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden text-neon p-1" id="mobile-menu-btn">
+            <button onClick={() => setMobileMenu(!mobileMenu)} className="md:hidden text-emerald p-1" id="mobile-menu-btn">
               {mobileMenu ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -107,11 +107,11 @@ export default function LandingPage() {
               className="md:hidden border-t border-border-neon bg-black/95 backdrop-blur-xl overflow-hidden"
             >
               <div className="px-4 py-4 flex flex-col gap-1">
-                <a href="#features" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Features</a>
-                <a href="#how-it-works" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Como Funciona</a>
-                <a href="#pricing" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Preços</a>
-                <Link href="/login" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Login</Link>
-                <Link href="/register" onClick={() => setMobileMenu(false)} className="btn-neon-filled text-center text-xs py-3 px-4 mt-3">Começar Grátis</Link>
+                <a href="#features" onClick={() => setMobileMenu(false)} className="text-text-secondary text-sm py-3 px-2 hover:text-emerald border-b border-white/5">Recursos</a>
+                <a href="#how-it-works" onClick={() => setMobileMenu(false)} className="text-text-secondary text-sm py-3 px-2 hover:text-emerald border-b border-white/5">Como Funciona</a>
+                <a href="#pricing" onClick={() => setMobileMenu(false)} className="text-text-secondary text-sm py-3 px-2 hover:text-emerald border-b border-white/5">Planos</a>
+                <Link href="/login" onClick={() => setMobileMenu(false)} className="text-text-secondary text-sm py-3 px-2 hover:text-emerald border-b border-white/5">Entrar</Link>
+                <Link href="/register" onClick={() => setMobileMenu(false)} className="btn-neon-filled text-center text-sm py-3 px-4 mt-3">Começar Agora</Link>
               </div>
             </motion.div>
           )}
@@ -119,55 +119,48 @@ export default function LandingPage() {
       </nav>
 
       {/* ── HERO ── */}
-      <section className="relative z-10 pt-28 sm:pt-36 lg:pt-40 pb-12 sm:pb-20 px-4 sm:px-6">
+      <section className="relative z-10 pt-32 sm:pt-40 lg:pt-48 pb-16 sm:pb-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center">
+          <div className="flex flex-col lg:grid lg:grid-cols-2 gap-10 lg:gap-16 items-start lg:items-center">
             {/* Left */}
             <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-              <div className="inline-flex items-center gap-2 px-3 py-1 border border-border-neon bg-neon-glow rounded-sm mb-4 sm:mb-6">
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 border border-emerald/20 bg-emerald/5 rounded-full mb-6">
                 <span className="status-dot status-active" />
-                <span className="font-mono text-neon text-[10px] sm:text-xs">SHIELD ATIVO — v2.0</span>
+                <span className="text-emerald text-xs font-medium">Proteção ativa em tempo real</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 sm:mb-6">
-                <span className="text-white">Blindagem</span>{" "}
-                <span className="text-neon glow-neon-text">Enterprise</span>
-                <br />
-                <span className="text-text-secondary">para seus Funis</span>
+              <h1 className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] mb-6">
+                <span className="text-white">Seus funis.</span><br />
+                <span className="text-emerald">Blindados.</span>
               </h1>
 
-              <p className="text-text-secondary text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 max-w-xl leading-relaxed">
-                Proteja suas Landing Pages, VSLs e ofertas contra{" "}
-                <span className="text-neon">espiões</span>,{" "}
-                <span className="text-neon">clonadores</span> e{" "}
-                <span className="text-neon">tráfego fraudulento</span>.
-                Motor de segurança com verificação em tempo real.
+              <p className="text-text-secondary text-base sm:text-lg mb-8 max-w-lg leading-relaxed">
+                Faça seus espiões e clonadores trabalharem <em>para você</em>. O AkkaRabbit transforma tentativas de pirataria em receita.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <Link href="/register" className="btn-neon-filled gap-2" id="hero-cta">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-8">
+                <Link href="/register" className="btn-neon-filled" id="hero-cta">
                   <Lock className="w-4 h-4" />
                   Ativar Proteção
                   <ArrowRight className="w-4 h-4" />
                 </Link>
-                <a href="#how-it-works" className="btn-neon gap-2">
-                  <Terminal className="w-4 h-4" />
-                  Ver Demo
+                <a href="#how-it-works" className="btn-neon">
+                  Como Funciona
                 </a>
               </div>
 
               {/* Terminal */}
-              <div className="bg-bg-secondary border border-border-neon p-3 sm:p-4 font-mono text-xs sm:text-sm max-w-lg">
-                <div className="flex items-center gap-1.5 sm:gap-2 mb-2">
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-danger" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-warning" />
-                  <span className="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full bg-success" />
-                  <span className="text-text-muted text-[10px] sm:text-xs ml-1 sm:ml-2">terminal</span>
+              <div className="bg-[#0a0f0a] border border-emerald/10 p-4 rounded-xl font-mono text-xs sm:text-sm max-w-lg">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald" />
+                  <span className="text-text-muted text-[10px] ml-2">akkarabbit.sh</span>
                 </div>
                 <div className="text-text-secondary overflow-hidden">
-                  <span className="text-neon">$</span>{" "}
+                  <span className="text-emerald">$</span>{" "}
                   <span className="text-white break-all">{typedText}</span>
-                  <span className="cursor-blink text-neon">█</span>
+                  <span className="cursor-blink text-emerald">█</span>
                 </div>
               </div>
             </motion.div>
@@ -194,20 +187,14 @@ export default function LandingPage() {
               </div>
               
               {/* Video Content */}
-              <div className="rounded-b-lg border border-t-0 border-[#333] bg-black overflow-hidden relative shadow-[0_0_40px_rgba(0,255,170,0.15)] z-20">
+              <div className="rounded-2xl border border-emerald/10 bg-black overflow-hidden relative shadow-[0_8px_64px_rgba(52,211,153,0.1)] z-20">
                 <video 
                   src="/akkarabit.mp4" 
-                  autoPlay 
-                  loop 
-                  muted 
-                  playsInline 
-                  controls={false}
-                  className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-300"
+                  autoPlay loop muted playsInline controls={false}
+                  className="w-full h-auto object-cover"
                 />
               </div>
-
-              {/* Decorative Glow Behind Video */}
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-neon/10 blur-[100px] rounded-full z-0 pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[110%] bg-emerald/8 blur-[120px] rounded-full z-0 pointer-events-none" />
             </motion.div>
 
             {/* Mobile-only mini threat feed */}
@@ -217,10 +204,10 @@ export default function LandingPage() {
               transition={{ duration: 0.6, delay: 0.4 }}
               className="w-full lg:hidden"
             >
-              <div className="glass-card p-3 sm:p-4 rounded-sm overflow-hidden">
+               <div className="glass-card p-3 sm:p-4 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-2 mb-3">
-                  <AlertTriangle className="w-3.5 h-3.5 text-neon shrink-0" />
-                  <span className="font-mono text-neon text-[10px] sm:text-xs font-semibold">THREAT MONITOR</span>
+                  <AlertTriangle className="w-3.5 h-3.5 text-emerald shrink-0" />
+                  <span className="text-emerald text-[10px] sm:text-xs font-semibold">Ameaças detectadas</span>
                   <span className="ml-auto status-dot status-active animate-pulse-neon" />
                 </div>
                 <div className="space-y-1.5">
@@ -239,8 +226,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── STATS BAR ── */}
-      <section className="relative z-10 border-y border-border-neon bg-bg-secondary/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8">
+      <section className="relative z-10 border-y border-border-subtle bg-[#030503]/80 backdrop-blur-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-10 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {[
             { value: "99.9%", label: "Uptime SLA" },
             { value: "<50ms", label: "Latência Média" },
@@ -248,34 +235,34 @@ export default function LandingPage() {
             { value: "500+", label: "Funis Protegidos" },
           ].map((stat, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="text-center">
-              <div className="font-mono text-xl sm:text-2xl md:text-3xl font-bold text-neon glow-neon-text">{stat.value}</div>
-              <div className="text-text-muted text-[10px] sm:text-sm mt-1">{stat.label}</div>
+              <div className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-emerald">{stat.value}</div>
+              <div className="text-text-muted text-xs sm:text-sm mt-1">{stat.label}</div>
             </motion.div>
           ))}
         </div>
       </section>
 
       {/* ── FEATURES ── */}
-      <section id="features" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6">
+      <section id="features" className="relative z-10 py-20 sm:py-28 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// MÓDULOS DE PROTEÇÃO</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
-              Arsenal de Segurança <span className="text-neon">Completo</span>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
+            <span className="text-emerald text-xs sm:text-sm font-medium tracking-widest uppercase">Recursos</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 text-white">
+              Cada camada, uma <span className="text-emerald">fortaleza</span>
             </h2>
-            <p className="text-text-secondary mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-base">
-              Cada camada de proteção trabalha em conjunto para criar uma fortaleza digital impenetrável para seus funis de venda.
+            <p className="text-text-secondary mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+              Seis módulos de proteção que trabalham em conjunto para blindar seus funis.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {features.map((feature, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="glass-card p-5 sm:p-6 rounded-sm group cursor-default">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 border border-border-neon flex items-center justify-center mb-3 sm:mb-4 group-hover:glow-neon transition-all">
-                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-neon" />
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08 }} className="glass-card p-6 sm:p-7 rounded-xl group cursor-default">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 bg-emerald/10 border border-emerald/15 rounded-lg flex items-center justify-center mb-4 group-hover:bg-emerald/15 transition-all">
+                  <feature.icon className="w-5 h-5 sm:w-6 sm:h-6 text-emerald" />
                 </div>
-                <h3 className="font-mono text-white font-semibold mb-2 text-base sm:text-lg">{feature.title}</h3>
-                <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">{feature.description}</p>
+                <h3 className="text-white font-semibold mb-2 text-base sm:text-lg">{feature.title}</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">{feature.description}</p>
               </motion.div>
             ))}
           </div>
@@ -283,12 +270,12 @@ export default function LandingPage() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section id="how-it-works" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon">
+      <section id="how-it-works" className="relative z-10 py-20 sm:py-28 px-4 sm:px-6 border-t border-border-subtle">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// FLUXO DE EXECUÇÃO</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
-              Como o <span className="text-neon">Shield</span> Funciona
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
+            <span className="text-emerald text-xs sm:text-sm font-medium tracking-widest uppercase">Como Funciona</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 text-white">
+              4 passos para <span className="text-emerald">blindar</span> tudo
             </h2>
           </motion.div>
 
@@ -300,12 +287,12 @@ export default function LandingPage() {
               { step: "04", title: "Ação", description: "Humanos recebem JWT de acesso. Bots são bloqueados.", icon: Lock },
             ].map((step, i) => (
               <motion.div key={i} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.12 }} className="relative text-center">
-                <div className="w-12 h-12 sm:w-16 sm:h-16 mx-auto border border-border-neon-strong flex items-center justify-center mb-3 sm:mb-4 glow-neon">
-                  <step.icon className="w-5 h-5 sm:w-7 sm:h-7 text-neon" />
+                <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto bg-emerald/10 border border-emerald/15 rounded-2xl flex items-center justify-center mb-4">
+                  <step.icon className="w-6 h-6 sm:w-7 sm:h-7 text-emerald" />
                 </div>
-                <div className="font-mono text-neon text-[10px] sm:text-xs mb-1 sm:mb-2">[{step.step}]</div>
-                <h3 className="font-mono text-white font-semibold mb-1 sm:mb-2 text-sm sm:text-base">{step.title}</h3>
-                <p className="text-text-secondary text-[10px] sm:text-sm leading-relaxed">{step.description}</p>
+                <div className="text-emerald text-xs mb-2 font-mono">{step.step}</div>
+                <h3 className="text-white font-semibold mb-2 text-sm sm:text-base">{step.title}</h3>
+                <p className="text-text-secondary text-xs sm:text-sm leading-relaxed">{step.description}</p>
                 {i < 3 && <ChevronRight className="hidden md:block absolute top-6 -right-4 lg:-right-5 w-5 h-5 lg:w-6 lg:h-6 text-border-neon-strong" />}
               </motion.div>
             ))}
@@ -314,15 +301,15 @@ export default function LandingPage() {
       </section>
 
       {/* ── AWARDS CAROUSEL ── */}
-      <section className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon overflow-hidden">
+      <section className="relative z-10 py-20 sm:py-28 px-4 sm:px-6 border-t border-border-subtle overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// RECONHECIMENTO AKKARABBIT</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
-              Celebre seus Marcos de <span className="text-neon">Elite</span>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 sm:mb-20">
+            <span className="text-emerald text-xs sm:text-sm font-medium tracking-widest uppercase">Reconhecimento</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 text-white">
+              Marcos de <span className="text-emerald">Elite</span>
             </h2>
-            <p className="text-text-secondary mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-base">
-              A exclusividade de proteger milhões em faturamento. Nossos clientes mais bem-sucedidos recebem placas de acesso restrito de acordo com o volume protegido.
+            <p className="text-text-secondary mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+              Nossos clientes mais bem-sucedidos recebem placas exclusivas de reconhecimento.
             </p>
           </motion.div>
 
@@ -370,24 +357,24 @@ export default function LandingPage() {
       </section>
 
       {/* ── PRICING ── */}
-      <section id="pricing" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon">
+      <section id="pricing" className="relative z-10 py-20 sm:py-28 px-4 sm:px-6 border-t border-border-subtle">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// PLANOS DE ACESSO</span>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
-              Escolha seu Nível de <span className="text-neon">Proteção</span>
+            <span className="text-emerald text-xs sm:text-sm font-medium tracking-widest uppercase">Planos</span>
+            <h2 className="font-display text-3xl sm:text-4xl md:text-5xl font-bold mt-3 sm:mt-4 text-white">
+              Invista na <span className="text-emerald">segurança</span>
             </h2>
           </motion.div>
 
           {/* Billing Toggle */}
-          <div className="flex justify-center mb-10 sm:mb-12">
-            <div className="inline-flex bg-black border border-border-neon rounded-sm p-1">
+          <div className="flex justify-center mb-12">
+            <div className="inline-flex bg-[#0a0f0a] border border-border-subtle rounded-xl p-1">
               {(["semanal", "mensal", "trimestral"] as const).map((cycle) => (
                 <button
                   key={cycle}
                   onClick={() => setBillingCycle(cycle)}
-                  className={`px-4 py-2 font-mono text-xs sm:text-sm capitalize transition-colors ${
-                    billingCycle === cycle ? "bg-neon-glow border border-border-neon-strong text-neon" : "text-text-muted hover:text-white"
+                  className={`px-5 py-2.5 text-sm capitalize transition-all rounded-lg ${
+                    billingCycle === cycle ? "bg-emerald/15 text-emerald font-semibold" : "text-text-muted hover:text-white"
                   }`}
                 >
                   {cycle}
@@ -404,26 +391,28 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.12 }}
-                className={`glass-card p-6 sm:p-8 rounded-sm relative ${plan.popular ? "border-neon glow-neon" : ""}`}
+                className={`glass-card p-7 sm:p-8 rounded-2xl relative ${
+                  plan.popular ? "border-emerald/40 shadow-[0_0_40px_rgba(52,211,153,0.1)]" : ""
+                }`}
               >
                 {plan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-neon text-black font-mono text-[9px] sm:text-[10px] px-3 sm:px-4 py-1 font-bold tracking-wider whitespace-nowrap">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald to-neon text-black text-[10px] px-4 py-1 font-bold rounded-full whitespace-nowrap">
                     MAIS POPULAR
                   </div>
                 )}
 
-                <div className="font-mono text-text-muted text-[10px] sm:text-xs tracking-widest uppercase mb-3 sm:mb-4">{plan.name}</div>
+                <div className="text-text-muted text-xs tracking-widest uppercase mb-4">{plan.name}</div>
 
-                <div className="flex items-baseline gap-1 mb-4 sm:mb-6">
-                  <span className="text-3xl sm:text-4xl font-bold text-white">{plan.price}</span>
-                  <span className="text-text-muted font-mono text-xs sm:text-sm">{plan.period}</span>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="font-display text-4xl sm:text-5xl font-bold text-white">{plan.price}</span>
+                  <span className="text-text-muted text-sm">{plan.period}</span>
                 </div>
 
-                <div className="space-y-2.5 sm:space-y-3 mb-6 sm:mb-8">
+                <div className="space-y-3 mb-8">
                   {plan.features.map((feature, fi) => (
-                    <div key={fi} className="flex items-start gap-2">
-                      <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-neon flex-shrink-0 mt-0.5" />
-                      <span className="text-text-secondary text-xs sm:text-sm leading-snug">{feature}</span>
+                    <div key={fi} className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald flex-shrink-0 mt-0.5" />
+                      <span className="text-text-secondary text-sm leading-snug">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -442,23 +431,21 @@ export default function LandingPage() {
       </section>
 
       {/* ── FOOTER ── */}
-      <footer className="relative z-10 border-t border-border-neon py-8 sm:py-12 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto flex flex-col items-center gap-4 sm:gap-6 md:flex-row md:justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-neon" />
-            <span className="font-mono text-neon font-bold tracking-wider text-sm">
-              AKKA<span className="text-white">RABBIT</span>
+      <footer className="relative z-10 border-t border-border-subtle py-10 sm:py-14 px-4 sm:px-6">
+        <div className="max-w-7xl mx-auto flex flex-col items-center gap-6 md:flex-row md:justify-between">
+          <div className="flex items-center gap-2.5">
+            <Rabbit className="w-6 h-6 text-emerald" />
+            <span className="font-display text-white font-bold tracking-tight text-base">
+              akka<span className="text-emerald">rabbit</span>
             </span>
           </div>
-
-          <div className="font-mono text-text-muted text-[10px] sm:text-xs text-center">
+          <div className="text-text-muted text-xs text-center">
             © 2026 AkkaRabbit. Todos os direitos reservados.
           </div>
-
-          <div className="flex items-center gap-4 sm:gap-6">
-            <a href="#" className="text-text-muted hover:text-neon transition-colors font-mono text-[10px] sm:text-xs">Termos</a>
-            <a href="#" className="text-text-muted hover:text-neon transition-colors font-mono text-[10px] sm:text-xs">Privacidade</a>
-            <a href="#" className="text-text-muted hover:text-neon transition-colors font-mono text-[10px] sm:text-xs">Contato</a>
+          <div className="flex items-center gap-6">
+            <a href="#" className="text-text-muted hover:text-emerald transition-colors text-xs">Termos</a>
+            <a href="#" className="text-text-muted hover:text-emerald transition-colors text-xs">Privacidade</a>
+            <a href="#" className="text-text-muted hover:text-emerald transition-colors text-xs">Contato</a>
           </div>
         </div>
       </footer>
