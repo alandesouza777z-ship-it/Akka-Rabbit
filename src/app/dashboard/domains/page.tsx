@@ -426,8 +426,8 @@ export default function DomainsPage() {
       });
       const data = await res.json();
       if (data.blocked) {
-        // Redireciona bots e espiões para o Google
-        window.location.href = 'https://google.com'; 
+        // Redireciona bots e espiões para a página de bloqueio
+        window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; 
       }
     } catch(e) {}
   })();
