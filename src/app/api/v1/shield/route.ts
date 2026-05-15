@@ -125,19 +125,33 @@ export async function POST(request: NextRequest) {
       .eq("domain_url", domain)
       .single();
 
-    if (domainData) {
-      // Auto-activate domain on first ping
-      if (domainData.status === "pending") {
-        await supabase
-          .from("domains")
-          .update({ status: "active" })
-          .eq("id", domainData.id);
-      }
+    // CLONER PREVENTION: If the domain is not registered in the dashboard for this API key
+    if (!domainData) {
+      await logEvent(
+        userData.id,
+        null,
+        ip,
+        userAgent,
+        "blocked",
+        "Domain Spoofing / Cloned Site"
+      );
+      return NextResponse.json(
+        { error: "Domain not authorized", blocked: true },
+        { status: 403 }
+      );
+    }
 
-      // Check if shield is enabled for this domain
-      if (!domainData.shield_enabled) {
-        return NextResponse.json({ blocked: false, bypassed: true });
-      }
+    // Auto-activate domain on first ping
+    if (domainData.status === "pending") {
+      await supabase
+        .from("domains")
+        .update({ status: "active" })
+        .eq("id", domainData.id);
+    }
+
+    // Check if shield is enabled for this domain
+    if (!domainData.shield_enabled) {
+      return NextResponse.json({ blocked: false, bypassed: true });
     }
 
     // 2. Check for verified crawlers (Googlebot, Facebook, etc.)
