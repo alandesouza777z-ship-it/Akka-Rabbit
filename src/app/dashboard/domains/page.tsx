@@ -451,7 +451,7 @@ export default function DomainsPage() {
                       type="text"
                       value={newVslUrl}
                       onChange={(e) => setNewVslUrl(e.target.value)}
-                      placeholder='Ex: <iframe src="https://vturb...'>
+                      placeholder="Ex: <iframe src='https://vturb...' />"
                       className="input-neon"
                     />
                   </div>
