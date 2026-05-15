@@ -331,8 +331,9 @@ export default function LandingPage() {
             <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
             <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
 
-            <div className="flex animate-carousel gap-6 sm:gap-10 whitespace-nowrap px-10">
-              {[...Array(3)].map((_, loopIndex) => (
+            <div className="flex animate-carousel gap-6 sm:gap-10 w-max pr-6 sm:pr-10">
+              {/* We render 12 sets of plaques to ensure it covers even ultra-wide monitors, translating -50% seamlessly */}
+              {[...Array(12)].map((_, loopIndex) => (
                 <div key={loopIndex} className="flex gap-6 sm:gap-10">
                   {[
                     { title: "Membro Esmerald", color: "text-[#00FF41]", glow: "shadow-[0_0_30px_rgba(0,255,65,0.3)]", bgPos: "left center" },
