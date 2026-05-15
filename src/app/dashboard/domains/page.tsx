@@ -135,34 +135,67 @@ export default function DomainsPage() {
         </button>
       </div>
 
-      {/* Tutorial Banner */}
-      <div className="glass-card rounded-sm p-5 border-border-neon/50 bg-bg-secondary/30">
-        <h3 className="font-mono text-white text-sm font-bold flex items-center gap-2 mb-4">
-          <AlertCircle className="w-4 h-4 text-neon" />
-          Como blindar suas páginas (Passo a Passo)
+      {/* Tutorial Banner with Premium Illustrations */}
+      <div className="glass-card rounded-sm p-6 mb-6">
+        <h3 className="font-mono text-white text-lg font-bold flex items-center gap-2 mb-6">
+          <AlertCircle className="w-5 h-5 text-neon" />
+          Guia de Integração Rápida
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="space-y-2">
-            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">1</div>
-            <p className="font-mono text-xs text-white font-semibold">Cadastre o Domínio</p>
-            <p className="text-text-muted text-[11px] leading-relaxed">
-              Clique em "Adicionar Domínio" acima e insira a URL onde sua Landing Page ou VSL está hospedada (ex: oferta.com).
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          
+          {/* Step 1 */}
+          <div className="flex flex-col relative">
+            <div className="absolute top-4 left-1/2 w-full h-[1px] bg-border-neon/30 hidden md:block" style={{ transform: 'translateX(50%)' }}></div>
+            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+                <circle cx="12" cy="10" r="3"></circle>
+                <line x1="12" y1="7" x2="12" y2="13"></line>
+                <line x1="9" y1="10" x2="15" y2="10"></line>
+              </svg>
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">1</div>
+            </div>
+            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Cadastre o Domínio</h4>
+            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
+              Clique em <span className="text-neon">Adicionar Domínio</span> e insira a URL do seu funil (ex: sua-oferta.com).
             </p>
           </div>
-          <div className="space-y-2">
-            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">2</div>
-            <p className="font-mono text-xs text-white font-semibold">Copie o Script</p>
-            <p className="text-text-muted text-[11px] leading-relaxed">
-              Após adicionar, clique no ícone de "Copiar" (<Copy className="inline w-3 h-3 mx-0.5" />) ao lado do Token para visualizar o código do seu Escudo.
+
+          {/* Step 2 */}
+          <div className="flex flex-col relative">
+            <div className="absolute top-4 left-1/2 w-full h-[1px] bg-border-neon/30 hidden md:block" style={{ transform: 'translateX(50%)' }}></div>
+            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                <polyline points="13 13 15 15 19 11"></polyline>
+              </svg>
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">2</div>
+            </div>
+            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Copie o Script</h4>
+            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
+              Clique no ícone de cópia ao lado do Token para revelar seu código de proteção exclusivo.
             </p>
           </div>
-          <div className="space-y-2">
-            <div className="w-6 h-6 rounded-sm bg-neon/10 border border-neon/30 text-neon flex items-center justify-center font-mono text-xs font-bold">3</div>
-            <p className="font-mono text-xs text-white font-semibold">Cole no seu Site</p>
-            <p className="text-text-muted text-[11px] leading-relaxed">
-              Cole o código dentro da tag <code className="text-neon">&lt;head&gt;</code> do seu site. A partir deste momento, o AkkaRabbit bloqueará espiões e robôs em tempo real!
+
+          {/* Step 3 */}
+          <div className="flex flex-col relative">
+            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
+                <polyline points="16 18 22 12 16 6"></polyline>
+                <polyline points="8 6 2 12 8 18"></polyline>
+                <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="4 4"></line>
+              </svg>
+              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">3</div>
+            </div>
+            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Injete na Página</h4>
+            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
+              Cole no <code className="text-neon text-[10px]">&lt;head&gt;</code> do site. O status mudará para <span className="text-neon">Active</span> no 1º acesso!
             </p>
           </div>
+
         </div>
       </div>
 
