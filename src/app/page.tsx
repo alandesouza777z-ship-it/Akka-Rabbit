@@ -19,11 +19,23 @@ const features = [
   { icon: BarChart3, title: "Security Dashboard", description: "Painel em tempo real com logs de ameaças, IPs bloqueados e métricas de proteção por domínio." },
 ];
 
-const plans = [
-  { name: "Starter", price: "R$ 97", period: "/mês", features: ["1 domínio protegido", "5.000 verificações/mês", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
-  { name: "Pro", price: "R$ 197", period: "/mês", features: ["5 domínios protegidos", "50.000 verificações/mês", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Webhooks customizados", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
-  { name: "Enterprise", price: "R$ 497", period: "/mês", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
-];
+const plans = {
+  semanal: [
+    { name: "Starter", price: "R$ 27", period: "/semana", features: ["1 domínio protegido", "1.250 verificações/sem", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 57", period: "/semana", features: ["5 domínios protegidos", "12.500 verificações/sem", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Enterprise", price: "R$ 147", period: "/semana", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
+  ],
+  mensal: [
+    { name: "Starter", price: "R$ 97", period: "/mês", features: ["1 domínio protegido", "5.000 verificações/mês", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 197", period: "/mês", features: ["5 domínios protegidos", "50.000 verificações/mês", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Webhooks customizados", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Enterprise", price: "R$ 497", period: "/mês", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
+  ],
+  trimestral: [
+    { name: "Starter", price: "R$ 247", period: "/trimestre", features: ["1 domínio protegido", "15.000 verificações/tri", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 497", period: "/trimestre", features: ["5 domínios protegidos", "150.000 verificações/tri", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Webhooks customizados", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Enterprise", price: "R$ 1.297", period: "/trimestre", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
+  ]
+};
 
 const threatLog = [
   { ip: "185.220.101.***", type: "Spy Tool", action: "BLOCKED", time: "0.3s" },
@@ -38,6 +50,7 @@ export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [currentLog, setCurrentLog] = useState(0);
   const [typedText, setTypedText] = useState("");
+  const [billingCycle, setBillingCycle] = useState<"semanal" | "mensal" | "trimestral">("mensal");
   const fullText = "akkarabbit --shield --mode=enterprise";
 
   useEffect(() => {
@@ -159,59 +172,42 @@ export default function LandingPage() {
               </div>
             </motion.div>
 
-            {/* Right - Threat Feed */}
+            {/* Right - Video Browser Mockup */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 0.3 }}
-              className="w-full lg:block hidden"
+              className="w-full relative"
             >
-              <div className="glass-card p-4 lg:p-6 rounded-sm">
-                <div className="flex items-center gap-2 mb-4">
-                  <AlertTriangle className="w-4 h-4 text-neon shrink-0" />
-                  <span className="font-mono text-neon text-xs sm:text-sm font-semibold">THREAT MONITOR — LIVE</span>
-                  <span className="ml-auto status-dot status-active animate-pulse-neon" />
+              {/* Browser Window Frame */}
+              <div className="rounded-t-lg bg-[#1c1c1c] border border-b-0 border-[#333] p-3 flex items-center shadow-2xl relative z-20">
+                {/* Traffic Lights */}
+                <div className="flex gap-2">
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
                 </div>
-
-                <div className="space-y-1.5">
-                  {threatLog.map((log, i) => (
-                    <motion.div
-                      key={i}
-                      animate={{
-                        opacity: i === currentLog ? 1 : 0.35,
-                        scale: i === currentLog ? 1.01 : 1,
-                      }}
-                      transition={{ duration: 0.3 }}
-                      className={`grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 lg:gap-3 p-2 lg:p-3 border font-mono text-[10px] lg:text-xs ${
-                        i === currentLog ? "border-border-neon-strong bg-neon-glow" : "border-transparent"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Cpu className="w-3 h-3 text-text-muted shrink-0" />
-                        <span className="text-text-secondary">{log.ip}</span>
-                      </div>
-                      <span className={`text-right ${log.type === "Googlebot" || log.type === "Facebook Bot" ? "text-neon" : "text-danger"}`}>
-                        {log.type}
-                      </span>
-                      <span className={`px-1.5 py-0.5 text-[9px] lg:text-[10px] font-bold ${log.action === "BLOCKED" ? "bg-danger/20 text-danger" : "bg-neon/20 text-neon"}`}>
-                        {log.action}
-                      </span>
-                      <span className="text-text-muted text-right">{log.time}</span>
-                    </motion.div>
-                  ))}
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-border-neon flex items-center justify-between">
-                  <div className="font-mono text-[10px] lg:text-xs">
-                    <span className="text-text-muted">Blocked:</span>{" "}
-                    <span className="text-danger font-bold">2,847</span>
-                  </div>
-                  <div className="font-mono text-[10px] lg:text-xs">
-                    <span className="text-text-muted">Uptime:</span>{" "}
-                    <span className="text-neon font-bold">99.97%</span>
-                  </div>
+                {/* URL Bar */}
+                <div className="mx-auto bg-black/50 border border-[#333] rounded px-4 py-1 flex items-center justify-center font-mono text-[9px] sm:text-[10px] text-text-muted/70 w-full max-w-[200px] truncate">
+                  app.akkarabbit.com/security
                 </div>
               </div>
+              
+              {/* Video Content */}
+              <div className="rounded-b-lg border border-t-0 border-[#333] bg-black overflow-hidden relative shadow-[0_0_40px_rgba(0,255,170,0.15)] z-20">
+                <video 
+                  src="/akkarabit.mp4" 
+                  autoPlay 
+                  loop 
+                  muted 
+                  playsInline 
+                  controls={false}
+                  className="w-full h-auto object-cover opacity-90 hover:opacity-100 transition-opacity duration-300"
+                />
+              </div>
+
+              {/* Decorative Glow Behind Video */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-neon/10 blur-[100px] rounded-full z-0 pointer-events-none" />
             </motion.div>
 
             {/* Mobile-only mini threat feed */}
@@ -327,8 +323,25 @@ export default function LandingPage() {
             </h2>
           </motion.div>
 
+          {/* Billing Toggle */}
+          <div className="flex justify-center mb-10 sm:mb-12">
+            <div className="inline-flex bg-black border border-border-neon rounded-sm p-1">
+              {(["semanal", "mensal", "trimestral"] as const).map((cycle) => (
+                <button
+                  key={cycle}
+                  onClick={() => setBillingCycle(cycle)}
+                  className={`px-4 py-2 font-mono text-xs sm:text-sm capitalize transition-colors ${
+                    billingCycle === cycle ? "bg-neon-glow border border-border-neon-strong text-neon" : "text-text-muted hover:text-white"
+                  }`}
+                >
+                  {cycle}
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 max-w-5xl mx-auto">
-            {plans.map((plan, i) => (
+            {plans[billingCycle].map((plan, i) => (
               <motion.div
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
