@@ -54,6 +54,24 @@ body {
 /* === SELECTION === */
 ::selection { background: rgba(0, 255, 65, 0.3); color: #00FF41; }
 
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 170, 0.3);
+    border-radius: 4px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 170, 0.5);
+  }
+}
+
 /* === NEON GLOW UTILITIES === */
 .glow-neon {
   box-shadow: 0 0 5px rgba(0, 255, 65, 0.3), 0 0 20px rgba(0, 255, 65, 0.1), inset 0 0 5px rgba(0, 255, 65, 0.05);

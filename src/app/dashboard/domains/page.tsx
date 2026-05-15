@@ -499,7 +499,7 @@ export default function DomainsPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-sm p-6 w-full max-w-2xl border border-border-neon-strong relative"
+              className="glass-card rounded-sm p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border-neon-strong relative"
             >
               <button
                 onClick={() => setShowScriptForDomain(null)}
@@ -521,7 +521,7 @@ export default function DomainsPage() {
               </p>
               
               <div className="relative">
-                <pre className="bg-black border border-border-neon p-4 rounded-sm overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed">
+                <pre className="bg-black border border-border-neon p-4 rounded-sm max-h-64 overflow-y-auto overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed custom-scrollbar">
 {`<script>
   /* AkkaRabbit Secure Core v2.0 - Do not modify */
   (async function(){
