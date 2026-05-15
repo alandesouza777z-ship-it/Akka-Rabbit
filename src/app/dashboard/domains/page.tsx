@@ -33,6 +33,7 @@ export default function DomainsPage() {
   const [adding, setAdding] = useState(false);
   const [error, setError] = useState("");
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [showScriptForDomain, setShowScriptForDomain] = useState<string | null>(null);
 
   const fetchDomains = useCallback(async () => {
     const supabase = createClient();
@@ -104,6 +105,7 @@ export default function DomainsPage() {
   const copyToken = (token: string) => {
     navigator.clipboard.writeText(token);
     setCopiedToken(token);
+    setShowScriptForDomain(token);
     setTimeout(() => setCopiedToken(null), 2000);
   };
 
@@ -377,7 +379,7 @@ export default function DomainsPage() {
 
       {/* Script Installation Modal */}
       <AnimatePresence>
-        {copiedToken && copiedToken !== "just-token" && domains.some(d => d.verification_token === copiedToken) && (
+        {showScriptForDomain && domains.some(d => d.verification_token === showScriptForDomain) && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -391,7 +393,7 @@ export default function DomainsPage() {
               className="glass-card rounded-sm p-6 w-full max-w-2xl border border-border-neon-strong relative"
             >
               <button
-                onClick={() => setCopiedToken(null)}
+                onClick={() => setShowScriptForDomain(null)}
                 className="absolute top-4 right-4 text-text-muted hover:text-white"
               >
                 <X className="w-5 h-5" />
@@ -435,7 +437,7 @@ export default function DomainsPage() {
               
               <div className="mt-6 flex justify-end">
                 <button
-                  onClick={() => setCopiedToken(null)}
+                  onClick={() => setShowScriptForDomain(null)}
                   className="btn-neon-filled"
                 >
                   Entendi
