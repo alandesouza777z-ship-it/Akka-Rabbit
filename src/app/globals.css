@@ -70,6 +70,15 @@ body {
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
     background: rgba(0, 255, 170, 0.5);
   }
+
+  @keyframes carousel {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(calc(-100% - 2.5rem)); }
+  }
+
+  .animate-carousel {
+    animation: carousel 20s linear infinite;
+  }
 }
 
 /* === NEON GLOW UTILITIES === */

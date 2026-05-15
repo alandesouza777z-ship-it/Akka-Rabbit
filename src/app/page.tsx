@@ -313,6 +313,61 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* ── AWARDS CAROUSEL ── */}
+      <section className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// RECONHECIMENTO AKKARABBIT</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
+              Celebre seus Marcos de <span className="text-neon">Elite</span>
+            </h2>
+            <p className="text-text-secondary mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+              A exclusividade de proteger milhões em faturamento. Nossos clientes mais bem-sucedidos recebem placas de acesso restrito de acordo com o volume protegido.
+            </p>
+          </motion.div>
+
+          <div className="relative w-full overflow-hidden flex items-center">
+            {/* Left and Right Gradients to fade edges */}
+            <div className="absolute left-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none" />
+            <div className="absolute right-0 top-0 bottom-0 w-20 sm:w-40 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none" />
+
+            <div className="flex animate-carousel gap-6 sm:gap-10 whitespace-nowrap px-10">
+              {[...Array(3)].map((_, loopIndex) => (
+                <div key={loopIndex} className="flex gap-6 sm:gap-10">
+                  {[
+                    { title: "Membro Esmerald", color: "text-[#00FF41]", glow: "shadow-[0_0_30px_rgba(0,255,65,0.3)]", bgPos: "left center" },
+                    { title: "Membro Ruby", color: "text-[#FF1133]", glow: "shadow-[0_0_30px_rgba(255,17,51,0.3)]", bgPos: "center center" },
+                    { title: "Membro Gold Rabbit", color: "text-[#FFD700]", glow: "shadow-[0_0_30px_rgba(255,215,0,0.3)]", bgPos: "right center" }
+                  ].map((award, i) => (
+                    <div 
+                      key={i}
+                      className="group relative w-[200px] h-[300px] sm:w-[280px] sm:h-[420px] shrink-0 cursor-pointer rounded-md overflow-hidden transition-all duration-500 hover:-translate-y-4"
+                    >
+                      {/* Image slice */}
+                      <div 
+                        className={`absolute inset-0 bg-[url('/awards.jpg')] bg-no-repeat transition-all duration-500 group-hover:${award.glow}`}
+                        style={{ backgroundSize: '300% 100%', backgroundPosition: award.bgPos }}
+                      />
+                      
+                      {/* Dark overlay that disappears on hover */}
+                      <div className="absolute inset-0 bg-black/40 transition-opacity duration-300 group-hover:opacity-0" />
+                      
+                      {/* Hover text block */}
+                      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 bg-gradient-to-t from-black/90 via-black/60 to-transparent translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-end">
+                        <Shield className={`w-6 h-6 sm:w-8 sm:h-8 mb-2 ${award.color}`} />
+                        <h3 className={`font-mono font-bold text-sm sm:text-lg uppercase tracking-widest text-center ${award.color}`}>
+                          {award.title}
+                        </h3>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── PRICING ── */}
       <section id="pricing" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon">
         <div className="max-w-7xl mx-auto">
