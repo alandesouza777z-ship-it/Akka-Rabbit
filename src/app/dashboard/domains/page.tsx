@@ -310,6 +310,77 @@ export default function DomainsPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Script Installation Modal */}
+      <AnimatePresence>
+        {copiedToken && copiedToken !== "just-token" && domains.some(d => d.verification_token === copiedToken) && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="glass-card rounded-sm p-6 w-full max-w-2xl border border-border-neon-strong relative"
+            >
+              <button
+                onClick={() => setCopiedToken(null)}
+                className="absolute top-4 right-4 text-text-muted hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+              
+              <div className="flex items-center gap-2 mb-4">
+                <Shield className="w-5 h-5 text-neon" />
+                <h2 className="font-mono text-white font-bold text-lg">
+                  Como Instalar a Proteção
+                </h2>
+              </div>
+              
+              <p className="text-text-secondary text-sm mb-4">
+                Copie o script abaixo e cole-o dentro da tag <code className="text-neon">&lt;head&gt;</code> da sua página (Landing Page, VSL, etc).
+                Ele já está configurado com a sua API Key e URL do domínio.
+              </p>
+              
+              <div className="relative">
+                <pre className="bg-black border border-border-neon p-4 rounded-sm overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed">
+{`<script>
+  (async function() {
+    try {
+      const res = await fetch('https://${typeof window !== 'undefined' ? window.location.host : 'seusite.com'}/api/v1/shield', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': 'COLE_SUA_API_KEY_AQUI' 
+        },
+        body: JSON.stringify({ domain: window.location.hostname })
+      });
+      const data = await res.json();
+      if (data.blocked) {
+        // Redireciona bots e espiões para o Google
+        window.location.href = 'https://google.com'; 
+      }
+    } catch(e) {}
+  })();
+</script>`}
+                </pre>
+              </div>
+              
+              <div className="mt-6 flex justify-end">
+                <button
+                  onClick={() => setCopiedToken(null)}
+                  className="btn-neon-filled"
+                >
+                  Entendi
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
