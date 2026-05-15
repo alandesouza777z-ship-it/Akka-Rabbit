@@ -120,14 +120,24 @@ export async function POST(request: NextRequest) {
     // Find domain record
     const { data: domainData } = await supabase
       .from("domains")
-      .select("id, shield_enabled")
+      .select("id, shield_enabled, status")
       .eq("user_id", userData.id)
       .eq("domain_url", domain)
       .single();
 
-    // Check if shield is enabled for this domain
-    if (domainData && !domainData.shield_enabled) {
-      return NextResponse.json({ blocked: false, bypassed: true });
+    if (domainData) {
+      // Auto-activate domain on first ping
+      if (domainData.status === "pending") {
+        await supabase
+          .from("domains")
+          .update({ status: "active" })
+          .eq("id", domainData.id);
+      }
+
+      // Check if shield is enabled for this domain
+      if (!domainData.shield_enabled) {
+        return NextResponse.json({ blocked: false, bypassed: true });
+      }
     }
 
     // 2. Check for verified crawlers (Googlebot, Facebook, etc.)
