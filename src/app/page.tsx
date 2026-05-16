@@ -91,7 +91,7 @@ export default function LandingPage() {
 
             <div className="hidden md:flex items-center gap-6 lg:gap-8">
               <a href="#features" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Features</a>
-              <a href="#how-it-works" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Como Funciona</a>
+              <Link href="/como-funciona" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Como Funciona</Link>
               <a href="#pricing" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Preços</a>
               <Link href="/login" className="text-text-secondary hover:text-neon transition-colors font-mono text-sm">Login</Link>
               <Link href="/register" className="btn-neon-filled text-xs py-2 px-4">Começar Grátis</Link>
@@ -113,7 +113,7 @@ export default function LandingPage() {
             >
               <div className="px-4 py-4 flex flex-col gap-1">
                 <a href="#features" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Features</a>
-                <a href="#how-it-works" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Como Funciona</a>
+                <Link href="/como-funciona" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Como Funciona</Link>
                 <a href="#pricing" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Preços</a>
                 <Link href="/login" onClick={() => setMobileMenu(false)} className="text-text-secondary font-mono text-sm py-3 px-2 hover:text-neon border-b border-white/5">Login</Link>
                 <Link href="/register" onClick={() => setMobileMenu(false)} className="btn-neon-filled text-center text-xs py-3 px-4 mt-3">Começar Grátis</Link>

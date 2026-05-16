@@ -41,6 +41,7 @@ interface DashboardShellProps {
 
 const navItems = [
   { href: "/dashboard", label: "Overview", icon: LayoutDashboard },
+  { href: "/dashboard/como-funciona", label: "Como Funciona", icon: Shield },
   { href: "/dashboard/domains", label: "Domínios", icon: Globe },
   { href: "/dashboard/logs", label: "Security Logs", icon: FileText },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
