@@ -17,6 +17,7 @@ import {
   Zap,
   Trophy,
   Headset,
+  Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -43,6 +44,7 @@ const navItems = [
   { href: "/dashboard/domains", label: "Domínios", icon: Globe },
   { href: "/dashboard/logs", label: "Security Logs", icon: FileText },
   { href: "/dashboard/api-keys", label: "API Keys", icon: Key },
+  { href: "/dashboard/networking", label: "Networking", icon: Users },
   { href: "/dashboard/rewards", label: "Premiações", icon: Trophy },
   { href: "/dashboard/support", label: "Suporte", icon: Headset },
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
