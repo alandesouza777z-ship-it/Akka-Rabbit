@@ -64,6 +64,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: `Asaas PIX: ${paymentData.errors?.[0]?.description || "Erro desconhecido"}` }, { status: 400 });
     }
 
+    // TRAVA DE SEGURANÇA: O Asaas converteu para Boleto?
+    if (paymentData.billingType !== "PIX") {
+       console.error("[Asaas Fallback Alert]: Asaas gerou como", paymentData.billingType);
+       return NextResponse.json({ 
+         error: `O Asaas bloqueou o PIX para sua conta e gerou um Boleto. Verifique a aprovação da sua conta no painel do Asaas.` 
+       }, { status: 400 });
+    }
+
     // 3. Pegar o Payload do QR Code
     const qrReq = await fetch(`https://api.asaas.com/v3/payments/${paymentData.id}/pixQrCode`, {
       method: "GET",
@@ -73,7 +81,10 @@ export async function POST(request: NextRequest) {
     const qrData = await qrReq.json();
     if (!qrReq.ok) {
       console.error("[Asaas QRCode Error]:", qrData);
-      return NextResponse.json({ error: `Asaas QR Code: ${qrData.errors?.[0]?.description || "Erro desconhecido"}` }, { status: 400 });
+      return NextResponse.json({ 
+        error: `Asaas QR Code: ${qrData.errors?.[0]?.description || "Erro desconhecido"}`,
+        debug_payment: paymentData 
+      }, { status: 400 });
     }
 
     // Retorna os dados necessários para o frontend montar o modal

@@ -86,6 +86,10 @@ export default function LandingCheckoutModal({ isOpen, onClose, planTier }: Land
         });
         setStep(2); // Muda para a tela do QR Code
       } else {
+        if (data.debug_payment) {
+           console.log("DEBUG ASAAS:", data.debug_payment);
+           throw new Error(data.error + " | Ver console para detalhes. Billing Type: " + data.debug_payment.billingType);
+        }
         throw new Error(data.error || "Erro ao gerar PIX");
       }
 
