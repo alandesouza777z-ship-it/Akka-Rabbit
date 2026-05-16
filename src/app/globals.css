@@ -113,15 +113,18 @@ body {
 .glow-neon-text {
   text-shadow: 0 0 8px rgba(0, 255, 65, 0.4), 0 0 24px rgba(0, 255, 65, 0.2);
 }
-.landing-page {
-  cursor: url('/rabbit-cursor.svg') 16 16, auto;
+.landing-page,
+.landing-page * {
+  cursor: url('/rabbit-cursor.svg') 16 16, auto !important;
 }
 
 /* Ensure buttons and links still have pointers, but maybe custom as well */
 .landing-page a,
 .landing-page button,
-.landing-page [role="button"] {
-  cursor: url('/rabbit-cursor.svg') 16 16, pointer;
+.landing-page [role="button"],
+.landing-page a *,
+.landing-page button * {
+  cursor: url('/rabbit-cursor.svg') 16 16, pointer !important;
 }
 
 /* === BUTTONS === */
