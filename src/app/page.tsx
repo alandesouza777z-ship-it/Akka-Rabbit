@@ -265,12 +265,26 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center relative z-10 perspective-1000">
-            <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md">
-              <div className="w-full h-full bg-[url('/dashboard-preview-1.png')] bg-cover bg-center transition-opacity" />
+          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center relative z-10 perspective-[2000px]">
+            <TiltCard className="w-full lg:w-1/2 min-h-[300px]">
+              <div className="w-full h-full relative p-2 md:p-4 bg-gradient-to-br from-[#050505] to-[#111] rounded-lg">
+                <div className="absolute inset-0 bg-neon/5 blur-3xl pointer-events-none" />
+                <img 
+                  src="/dashboard-preview-1.png" 
+                  alt="Dashboard View 1" 
+                  className="w-full h-full object-contain rounded drop-shadow-[0_0_15px_rgba(0,255,65,0.15)] relative z-10"
+                />
+              </div>
             </TiltCard>
-            <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md mt-4 lg:mt-12">
-              <div className="w-full h-full bg-[url('/dashboard-preview-2.png')] bg-cover bg-center transition-opacity" />
+            <TiltCard className="w-full lg:w-1/2 min-h-[300px] lg:mt-16">
+              <div className="w-full h-full relative p-2 md:p-4 bg-gradient-to-br from-[#050505] to-[#111] rounded-lg">
+                <div className="absolute inset-0 bg-neon/5 blur-3xl pointer-events-none" />
+                <img 
+                  src="/dashboard-preview-2.png" 
+                  alt="Dashboard View 2" 
+                  className="w-full h-full object-contain rounded drop-shadow-[0_0_15px_rgba(0,255,65,0.15)] relative z-10"
+                />
+              </div>
             </TiltCard>
           </div>
         </div>
