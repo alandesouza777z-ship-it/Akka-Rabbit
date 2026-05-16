@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
         value: priceValue,
         dueDate: new Date().toISOString().split("T")[0],
         description: `AkkaRabbit - Plano ${planTier.toUpperCase()}`,
-        externalReference: planTier
+        externalReference: `${email}|${planTier}`
       })
     });
 
