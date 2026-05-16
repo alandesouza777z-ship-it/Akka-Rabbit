@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Settings, User, Shield, Save, Loader2, CheckCircle2, Zap, ArrowUpRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import PixCheckoutModal from "@/components/dashboard/PixCheckoutModal";
 
 export default function SettingsPage() {
   const [fullName, setFullName] = useState("");
@@ -12,6 +13,11 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  
+  // PIX Modal State
+  const [pixModalOpen, setPixModalOpen] = useState(false);
+  const [generatingPix, setGeneratingPix] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState({ image: "", payload: "", value: 0 });
 
   const fetchProfile = useCallback(async () => {
     const supabase = createClient();
@@ -37,6 +43,39 @@ export default function SettingsPage() {
     setSaving(false);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
+  };
+
+  const handleUpgrade = async () => {
+    setGeneratingPix(true);
+    try {
+      // No exemplo, estamos forçando o upgrade para o plano "pro", mas isso pode ser dinâmico
+      const res = await fetch("/api/checkout/asaas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          planTier: "pro", 
+          email, 
+          name: fullName 
+        }),
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        setQrCodeData({
+          image: data.qrCodeImage,
+          payload: data.qrCodePayload,
+          value: data.value
+        });
+        setPixModalOpen(true);
+      } else {
+        alert(data.error || "Erro ao gerar PIX");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao processar checkout");
+    } finally {
+      setGeneratingPix(false);
+    }
   };
 
   if (loading) return (
@@ -105,19 +144,38 @@ export default function SettingsPage() {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
             <div className="text-[12px] text-text-muted font-medium mb-1">Domínios</div>
-            <div className="font-mono text-xl font-bold text-white">{planInfo[plan]?.domains || 1}</div>
+            <div className="font-mono text-xl font-bold text-white">{currentPlan.domains}</div>
           </div>
           <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05]">
             <div className="text-[12px] text-text-muted font-medium mb-1">Requisições</div>
-            <div className="font-mono text-xl font-bold text-white">{planInfo[plan]?.requests || "5.000/mês"}</div>
+            <div className="font-mono text-xl font-bold text-white">{currentPlan.requests}</div>
           </div>
         </div>
 
-        <button className="btn-neon flex items-center gap-2 text-[13px]">
-          <ArrowUpRight className="w-3.5 h-3.5" />
-          Upgrade de Plano
-        </button>
+        {plan !== "enterprise" && (
+          <button 
+            onClick={handleUpgrade}
+            disabled={generatingPix}
+            className="btn-neon flex items-center gap-2 text-[13px] disabled:opacity-50"
+          >
+            {generatingPix ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <ArrowUpRight className="w-3.5 h-3.5" />
+            )}
+            {generatingPix ? "Gerando PIX..." : "Upgrade de Plano"}
+          </button>
+        )}
       </motion.div>
+
+      {/* PIX Modal */}
+      <PixCheckoutModal 
+        isOpen={pixModalOpen} 
+        onClose={() => setPixModalOpen(false)}
+        qrCodeImage={qrCodeData.image}
+        qrCodePayload={qrCodeData.payload}
+        value={qrCodeData.value}
+      />
     </div>
   );
 }
