@@ -44,10 +44,11 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    console.error("[Checkout Error]:", err.message);
+  } catch (err) {
+    const error = err as Error;
+    console.error("[Checkout Error]:", error.message);
     return NextResponse.json(
-      { error: err.message || "Failed to create checkout" },
+      { error: error.message || "Failed to create checkout" },
       { status: 500 }
     );
   }

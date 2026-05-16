@@ -259,7 +259,7 @@ export default function LandingPage() {
       <section id="features" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// MÓDULOS DE PROTEÇÃO</span>
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">{"// MÓDULOS DE PROTEÇÃO"}</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
               Arsenal de Segurança <span className="text-neon">Completo</span>
             </h2>
@@ -286,7 +286,7 @@ export default function LandingPage() {
       <section id="how-it-works" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// FLUXO DE EXECUÇÃO</span>
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">{"// FLUXO DE EXECUÇÃO"}</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
               Como o <span className="text-neon">Shield</span> Funciona
             </h2>
@@ -317,7 +317,7 @@ export default function LandingPage() {
       <section className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon overflow-hidden">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// RECONHECIMENTO AKKARABBIT</span>
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">{"// RECONHECIMENTO AKKARABBIT"}</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
               Celebre seus Marcos de <span className="text-neon">Elite</span>
             </h2>
@@ -373,7 +373,7 @@ export default function LandingPage() {
       <section id="pricing" className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 border-t border-border-neon">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16">
-            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">// PLANOS DE ACESSO</span>
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">{"// PLANOS DE ACESSO"}</span>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
               Escolha seu Nível de <span className="text-neon">Proteção</span>
             </h2>

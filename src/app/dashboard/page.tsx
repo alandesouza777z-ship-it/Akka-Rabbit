@@ -62,7 +62,14 @@ export default function DashboardPage() {
     uptime: "100%",
   });
 
-  const [recentThreats, setRecentThreats] = useState<any[]>([]);
+  interface ThreatLog {
+    ip_address: string;
+    action: string;
+    threat_type: string;
+    domains?: { domain_url: string };
+    created_at: string;
+  }
+  const [recentThreats, setRecentThreats] = useState<ThreatLog[]>([]);
 
   const fetchDashboardData = useCallback(async () => {
     const supabase = createClient();
