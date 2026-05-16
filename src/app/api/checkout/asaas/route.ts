@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest) {
   try {
-    const { planTier, email, name } = await request.json();
+    const { planTier, email, name, cpfCnpj } = await request.json();
 
     if (!planTier) {
       return NextResponse.json({ error: "Plano é obrigatório" }, { status: 400 });
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
 
     const apiKey = process.env.ASAAS_API_KEY;
     if (!apiKey) {
-      return NextResponse.json({ error: "Chave do Asaas não configurada no servidor" }, { status: 500 });
+      return NextResponse.json({ error: "Chave do Asaas não configurada" }, { status: 500 });
     }
 
     const headers = {
@@ -33,14 +33,15 @@ export async function POST(request: NextRequest) {
       headers,
       body: JSON.stringify({
         name: name || "AkkaRabbit User",
-        email: email || "usuario@akkarabbit.com"
+        email: email || "usuario@akkarabbit.com",
+        cpfCnpj: cpfCnpj || undefined
       })
     });
     
     const customerData = await customerReq.json();
     if (!customerReq.ok) {
       console.error("[Asaas Customer Error]:", customerData);
-      return NextResponse.json({ error: "Erro ao criar cliente no Asaas" }, { status: 500 });
+      return NextResponse.json({ error: `Asaas Cliente: ${customerData.errors?.[0]?.description || "Erro desconhecido"}` }, { status: 400 });
     }
 
     // 2. Criar a cobrança PIX
@@ -53,14 +54,14 @@ export async function POST(request: NextRequest) {
         value: priceValue,
         dueDate: new Date().toISOString().split("T")[0],
         description: `AkkaRabbit - Plano ${planTier.toUpperCase()}`,
-        externalReference: planTier // Usaremos isso no webhook para saber qual plano ativar
+        externalReference: planTier
       })
     });
 
     const paymentData = await paymentReq.json();
     if (!paymentReq.ok) {
       console.error("[Asaas Payment Error]:", paymentData);
-      return NextResponse.json({ error: "Erro ao gerar cobrança PIX no Asaas" }, { status: 500 });
+      return NextResponse.json({ error: `Asaas PIX: ${paymentData.errors?.[0]?.description || "Erro desconhecido"}` }, { status: 400 });
     }
 
     // 3. Pegar o Payload do QR Code
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     const qrData = await qrReq.json();
     if (!qrReq.ok) {
       console.error("[Asaas QRCode Error]:", qrData);
-      return NextResponse.json({ error: "Erro ao gerar QR Code PIX" }, { status: 500 });
+      return NextResponse.json({ error: `Asaas QR Code: ${qrData.errors?.[0]?.description || "Erro desconhecido"}` }, { status: 400 });
     }
 
     // Retorna os dados necessários para o frontend montar o modal

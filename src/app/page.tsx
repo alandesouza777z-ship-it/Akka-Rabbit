@@ -46,11 +46,15 @@ const threatLog = [
   { ip: "157.240.1.***", type: "Facebook Bot", action: "ALLOWED", time: "5.0s" },
 ];
 
+import LandingCheckoutModal from "@/components/LandingCheckoutModal";
+
 export default function LandingPage() {
   const [mobileMenu, setMobileMenu] = useState(false);
   const [currentLog, setCurrentLog] = useState(0);
   const [typedText, setTypedText] = useState("");
   const [billingCycle, setBillingCycle] = useState<"semanal" | "mensal" | "trimestral">("mensal");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"starter" | "pro" | "enterprise" | "trial">("trial");
   const fullText = "akkarabbit --shield --mode=enterprise";
 
   useEffect(() => {
@@ -145,11 +149,18 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <Link href="/register" className="btn-neon-filled gap-2" id="hero-cta">
+                <button 
+                  onClick={() => {
+                    setSelectedPlan("trial");
+                    setModalOpen(true);
+                  }}
+                  className="btn-neon-filled gap-2" 
+                  id="hero-cta"
+                >
                   <Lock className="w-4 h-4" />
-                  Ativar Proteção
+                  Teste Grátis (1 Dia)
                   <ArrowRight className="w-4 h-4" />
-                </Link>
+                </button>
                 <a href="#how-it-works" className="btn-neon gap-2">
                   <Terminal className="w-4 h-4" />
                   Ver Demo
@@ -428,18 +439,28 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                <Link
-                  href="/register"
+                <button
+                  onClick={() => {
+                    setSelectedPlan(plan.name.toLowerCase() as "starter" | "pro" | "enterprise");
+                    setModalOpen(true);
+                  }}
                   className={`block text-center w-full ${plan.popular ? "btn-neon-filled" : "btn-neon"}`}
                   id={`pricing-${plan.name.toLowerCase()}`}
                 >
                   {plan.cta}
-                </Link>
+                </button>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
+      {/* Landing Modal */}
+      <LandingCheckoutModal 
+        isOpen={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        planTier={selectedPlan} 
+      />
 
       {/* ── FOOTER ── */}
       <footer className="relative z-10 border-t border-border-neon py-8 sm:py-12 px-4 sm:px-6">
