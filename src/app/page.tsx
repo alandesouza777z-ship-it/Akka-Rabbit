@@ -267,14 +267,10 @@ export default function LandingPage() {
 
           <div className="flex flex-col lg:flex-row gap-8 items-center justify-center relative z-10 perspective-1000">
             <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md">
-              <div className="w-full h-full bg-[url('/dashboard-preview-1.png')] bg-cover bg-center opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white/30 font-mono text-xs">(Adicione sua imagem em public/dashboard-preview-1.png)</span>
-              </div>
+              <div className="w-full h-full bg-[url('/dashboard-preview-1.png')] bg-cover bg-center transition-opacity" />
             </TiltCard>
             <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md mt-4 lg:mt-12">
-              <div className="w-full h-full bg-[url('/dashboard-preview-2.png')] bg-cover bg-center opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center">
-                <span className="text-white/30 font-mono text-xs">(Adicione sua imagem em public/dashboard-preview-2.png)</span>
-              </div>
+              <div className="w-full h-full bg-[url('/dashboard-preview-2.png')] bg-cover bg-center transition-opacity" />
             </TiltCard>
           </div>
         </div>
