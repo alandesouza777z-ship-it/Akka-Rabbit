@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create Stripe Checkout Session with PIX enabled
+    // Create Stripe Checkout Session
     const session = await stripe.checkout.sessions.create({
       mode: "subscription",
-      payment_method_types: ["card", "pix"],
+      payment_method_types: ["card", "boleto"],
       line_items: [
         {
           price: priceId,
@@ -38,14 +38,9 @@ export async function POST(request: NextRequest) {
         plan_tier: planTier,
       },
       customer_email: customerEmail || undefined,
+      // Card payments → Dashboard (instant)
       success_url: `${APP_URL}/dashboard?payment=success&plan=${planTier}`,
       cancel_url: `${APP_URL}/#pricing`,
-      // PIX-specific: allow async payment confirmation
-      payment_method_options: {
-        pix: {
-          expires_after_seconds: 900, // QR Code expires in 15 minutes
-        },
-      },
     });
 
     return NextResponse.json({ url: session.url });
