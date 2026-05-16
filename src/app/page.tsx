@@ -357,12 +357,9 @@ export default function LandingPage() {
                   </svg>
                 </div>
                 {/* Kwai Logo */}
-                <div className="absolute top-1/2 -right-6 -translate-y-1/2 w-12 h-12 bg-[#FF6900] rounded-xl flex items-center justify-center shadow-[0_0_20px_rgba(255,105,0,0.5)]" style={{ transform: "rotate(-90deg)" }}>
-                  <svg viewBox="0 0 100 100" className="w-8 h-8">
-                    <path d="M25 45c0-11 9-20 20-20h10c11 0 20 9 20 20v10c0 11-9 20-20 20H45c-11 0-20-9-20-20V45z" stroke="white" strokeWidth="8" fill="none"/>
-                    <circle cx="40" cy="50" r="6" fill="white"/>
-                    <circle cx="65" cy="50" r="6" fill="white"/>
-                    <path d="M75 35L90 20M75 65L90 80" stroke="white" strokeWidth="8" strokeLinecap="round"/>
+                <div className="absolute top-1/2 -right-6 -translate-y-1/2 w-12 h-12 bg-[#FF6900] rounded-2xl flex items-center justify-center shadow-[0_0_20px_rgba(255,105,0,0.5)]" style={{ transform: "rotate(-90deg)" }}>
+                  <svg viewBox="0 0 1024 1024" className="w-8 h-8" fill="white">
+                    <path d="M720.5 384.5h-417v255h417v-255zM454 554.5a42.5 42.5 0 1 1 0-85 42.5 42.5 0 0 1 0 85zM636.5 540.5h-57v-21h57v21zm0-43.5h-57v-21h57v21zm0-43.5h-57v-21h57v21z" />
                   </svg>
                 </div>
               </div>
