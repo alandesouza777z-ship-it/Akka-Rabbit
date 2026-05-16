@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import MatrixRain from "@/components/MatrixRain";
+import TiltCard from "@/components/TiltCard";
 
 const features = [
   { icon: Eye, title: "Anti-Spy Shield", description: "Detecta e bloqueia ferramentas de espionagem como AdSpy, BigSpy e SimilarWeb em tempo real." },
@@ -21,18 +22,18 @@ const features = [
 
 const plans = {
   semanal: [
-    { name: "Starter", price: "R$ 27", period: "/semana", features: ["1 domínio protegido", "1.250 verificações/sem", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
-    { name: "Pro", price: "R$ 57", period: "/semana", features: ["5 domínios protegidos", "12.500 verificações/sem", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Starter", price: "R$ 27", period: "/semana", features: ["1 domínio protegido", "1.250 verificações/sem", "Sistema de Cloaking (Blackhat)", "Logs de segurança (7 dias)", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 57", period: "/semana", features: ["5 domínios protegidos", "12.500 verificações/sem", "Sistema de Cloaking (Blackhat)", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
     { name: "Enterprise", price: "R$ 147", period: "/semana", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
   ],
   mensal: [
-    { name: "Starter", price: "R$ 97", period: "/mês", features: ["1 domínio protegido", "5.000 verificações/mês", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
-    { name: "Pro", price: "R$ 197", period: "/mês", features: ["5 domínios protegidos", "50.000 verificações/mês", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Webhooks customizados", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Starter", price: "R$ 97", period: "/mês", features: ["1 domínio protegido", "5.000 verificações/mês", "Sistema de Cloaking (Blackhat)", "Logs de segurança (7 dias)", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 197", period: "/mês", features: ["5 domínios protegidos", "50.000 verificações/mês", "Sistema de Cloaking (Blackhat)", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "Webhooks customizados"], cta: "Escolher Pro", popular: true },
     { name: "Enterprise", price: "R$ 497", period: "/mês", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
   ],
   trimestral: [
-    { name: "Starter", price: "R$ 247", period: "/trimestre", features: ["1 domínio protegido", "15.000 verificações/tri", "Logs de segurança (7 dias)", "Proteção Anti-Spy básica", "Suporte via email"], cta: "Começar Agora", popular: false },
-    { name: "Pro", price: "R$ 497", period: "/trimestre", features: ["5 domínios protegidos", "150.000 verificações/tri", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "DNS Reverse Lookup", "Webhooks customizados", "Suporte prioritário"], cta: "Escolher Pro", popular: true },
+    { name: "Starter", price: "R$ 247", period: "/trimestre", features: ["1 domínio protegido", "15.000 verificações/tri", "Sistema de Cloaking (Blackhat)", "Logs de segurança (7 dias)", "Suporte via email"], cta: "Começar Agora", popular: false },
+    { name: "Pro", price: "R$ 497", period: "/trimestre", features: ["5 domínios protegidos", "150.000 verificações/tri", "Sistema de Cloaking (Blackhat)", "Logs de segurança (30 dias)", "Fingerprint Engine completo", "Webhooks customizados"], cta: "Escolher Pro", popular: true },
     { name: "Enterprise", price: "R$ 1.297", period: "/trimestre", features: ["Domínios ilimitados", "Verificações ilimitadas", "Logs permanentes", "API dedicada", "IP Whitelist/Blacklist", "Regras customizadas", "Onboarding dedicado", "SLA 99.9%"], cta: "Falar com Vendas", popular: false },
   ]
 };
@@ -74,7 +75,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-black relative overflow-x-hidden">
+    <div className="min-h-screen bg-black relative overflow-x-hidden landing-page">
       <MatrixRain />
 
       {/* ── NAVBAR ── */}
@@ -242,6 +243,117 @@ export default function LandingPage() {
                       <span className={`shrink-0 px-1.5 py-0.5 text-[9px] font-bold ${log.action === "BLOCKED" ? "bg-danger/20 text-danger" : "bg-neon/20 text-neon"}`}>{log.action}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── INTERFACE PREVIEW (3D GLASS) ── */}
+      <section className="relative z-10 py-16 sm:py-24 px-4 sm:px-6 overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[500px] bg-neon/5 blur-[120px] rounded-full pointer-events-none" />
+        
+        <div className="max-w-7xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 sm:mb-16 relative z-10">
+            <span className="font-mono text-neon text-[10px] sm:text-sm tracking-widest uppercase">{"// TECNOLOGIA DE PONTA"}</span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mt-3 sm:mt-4 text-white">
+              Controle Total em <span className="text-neon">Tempo Real</span>
+            </h2>
+            <p className="text-text-secondary mt-3 sm:mt-4 max-w-2xl mx-auto text-sm sm:text-base">
+              Acompanhe ameaças, injete VSLs dinâmicas e gerencie o cloaking dos seus domínios através de uma interface desenhada para performance extrema.
+            </p>
+          </motion.div>
+
+          <div className="flex flex-col lg:flex-row gap-8 items-center justify-center relative z-10 perspective-1000">
+            <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md">
+              <div className="w-full h-full bg-[url('/dashboard-preview-1.png')] bg-cover bg-center opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white/30 font-mono text-xs">(Adicione sua imagem em public/dashboard-preview-1.png)</span>
+              </div>
+            </TiltCard>
+            <TiltCard className="w-full lg:w-1/2 aspect-video bg-black/40 backdrop-blur-md mt-4 lg:mt-12">
+              <div className="w-full h-full bg-[url('/dashboard-preview-2.png')] bg-cover bg-center opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center">
+                <span className="text-white/30 font-mono text-xs">(Adicione sua imagem em public/dashboard-preview-2.png)</span>
+              </div>
+            </TiltCard>
+          </div>
+        </div>
+      </section>
+
+      {/* ── TRAFFIC SOURCES ORBITAL ── */}
+      <section className="relative z-10 py-16 sm:py-32 px-4 sm:px-6 border-t border-border-neon bg-[#050505] overflow-hidden">
+        <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-20">
+          
+          {/* Text Content */}
+          <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} className="w-full lg:w-1/2 relative z-20">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
+              Compatível com todas as <span className="text-neon glow-neon-text">fontes de tráfego</span>
+            </h2>
+            <p className="text-text-secondary text-base sm:text-lg mb-8 leading-relaxed">
+              Não importa onde você anuncia. O AKKARABBIT se integra perfeitamente às principais plataformas de Ads para garantir que suas campanhas rodem sem interrupções e com cloaking invisível para os robôs.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {["Facebook Ads", "Google Ads", "TikTok Ads", "Kwai Ads", "Taboola", "Snapchat"].map(ad => (
+                <div key={ad} className="px-4 py-2 rounded-full border border-white/10 bg-white/5 text-text-muted font-mono text-xs">
+                  {ad}
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Solar System Orbital */}
+          <div className="w-full lg:w-1/2 h-[400px] sm:h-[500px] relative flex items-center justify-center">
+            {/* Center Mascot (The Sun) */}
+            <motion.div 
+              initial={{ scale: 0.8, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              className="relative z-20 w-32 h-32 sm:w-40 sm:h-40 rounded-full border-4 border-neon bg-black shadow-[0_0_50px_rgba(0,255,65,0.4)] flex items-center justify-center overflow-hidden p-2"
+            >
+              <div className="absolute inset-0 bg-neon/20 animate-pulse-neon rounded-full" />
+              <img src="/donkey-mascot.png" alt="AkkaRabbit Mascot" className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_10px_rgba(0,255,65,0.8)]" />
+            </motion.div>
+
+            {/* Orbit Lines */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute w-[220px] sm:w-[280px] h-[220px] sm:h-[280px] rounded-full border border-white/5 border-dashed" />
+              <div className="absolute w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] rounded-full border border-white/5 border-dashed" />
+              <div className="absolute w-[420px] sm:w-[520px] h-[420px] sm:h-[520px] rounded-full border border-white/5 border-dashed" />
+            </div>
+
+            {/* Planets (Logos) Orbiting */}
+            {/* Orbit 1 */}
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 20, ease: "linear" }} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[220px] sm:w-[280px] h-[220px] sm:h-[280px] rounded-full absolute">
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)]" style={{ transform: "rotate(-0deg)" }}>
+                  <span className="text-[#1877F2] font-bold text-xs">Meta</span>
+                </div>
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)]" style={{ transform: "rotate(-180deg)" }}>
+                  <span className="text-[#000000] font-bold text-xs">TikTok</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Orbit 2 */}
+            <motion.div animate={{ rotate: -360 }} transition={{ repeat: Infinity, duration: 30, ease: "linear" }} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[320px] sm:w-[400px] h-[320px] sm:h-[400px] rounded-full absolute">
+                <div className="absolute top-1/2 -left-5 -translate-y-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)]" style={{ transform: "rotate(90deg)" }}>
+                  <span className="text-[#0F9D58] font-bold text-[10px]">Google</span>
+                </div>
+                <div className="absolute top-1/2 -right-5 -translate-y-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.2)]" style={{ transform: "rotate(-90deg)" }}>
+                  <span className="text-[#FF6900] font-bold text-xs">Kwai</span>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Orbit 3 */}
+            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 45, ease: "linear" }} className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-[420px] sm:w-[520px] h-[420px] sm:h-[520px] rounded-full absolute">
+                <div className="absolute -top-4 right-10 w-10 h-10 bg-[#FFFC00] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(255,252,0,0.5)]">
+                  <span className="text-black font-bold text-[9px]">Snap</span>
+                </div>
+                <div className="absolute bottom-10 left-0 w-12 h-12 bg-[#001D4A] rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,29,74,0.5)]">
+                  <span className="text-white font-bold text-[8px]">Taboola</span>
                 </div>
               </div>
             </motion.div>
