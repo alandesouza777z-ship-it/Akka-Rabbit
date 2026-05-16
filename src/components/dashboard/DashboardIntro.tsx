@@ -7,15 +7,11 @@ export default function DashboardIntro() {
   const [showIntro, setShowIntro] = useState(false);
 
   useEffect(() => {
-    const hasPlayed = sessionStorage.getItem("akka_intro_played");
-    if (!hasPlayed) {
-      setShowIntro(true);
-      const timer = setTimeout(() => {
-        setShowIntro(false);
-        sessionStorage.setItem("akka_intro_played", "true");
-      }, 7500); // Intro duration: 7.5 seconds total
-      return () => clearTimeout(timer);
-    }
+    setShowIntro(true);
+    const timer = setTimeout(() => {
+      setShowIntro(false);
+    }, 7500); // Intro duration: 7.5 seconds total
+    return () => clearTimeout(timer);
   }, []);
 
   return (
