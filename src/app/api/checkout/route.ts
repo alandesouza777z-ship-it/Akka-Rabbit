@@ -6,7 +6,7 @@ import Stripe from "stripe";
 // Generates a checkout link with PIX + Card
 // ============================================
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key_for_build", {
   apiVersion: "2026-04-22.dahlia",
 });
 

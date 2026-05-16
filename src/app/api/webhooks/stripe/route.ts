@@ -7,7 +7,7 @@ import Stripe from "stripe";
 // Supports: PIX, Card, Boleto
 // ============================================
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "dummy_key_for_build", {
   apiVersion: "2026-04-22.dahlia",
 });
 
