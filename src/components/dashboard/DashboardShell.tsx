@@ -19,6 +19,7 @@ import {
   Headset,
   Users,
   Sparkles,
+  Bug,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -49,6 +50,7 @@ const navItems = [
   { href: "/dashboard/laundry", label: "Lavanderia de Criativos", icon: Sparkles },
   { href: "/dashboard/networking", label: "Networking", icon: Users },
   { href: "/dashboard/rewards", label: "Premiações", icon: Trophy },
+  { href: "/dashboard/bugbounty", label: "Bug Bounty", icon: Bug },
   { href: "/dashboard/support", label: "Suporte", icon: Headset },
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
