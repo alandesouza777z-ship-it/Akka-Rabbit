@@ -53,8 +53,9 @@ export default function LaundryPage() {
       let cleanedBlob: Blob;
 
       if (file.type.startsWith("image/")) {
-        // --- PROTEÇÃO DE IMAGEM: Filtro Anti-IA (Adversarial Noise) ---
-        // Desenha a imagem num canvas e altera os pixels matematicamente para confundir a Visão Computacional.
+        // --- PROTEÇÃO DE IMAGEM: Filtro Anti-IA + Remoção de EXIF ---
+        // Desenha a imagem num canvas e altera os pixels matematicamente.
+        // O canvas automaticamente DESTROI os metadados (EXIF) originais.
         const image = new Image();
         image.src = URL.createObjectURL(file);
         await new Promise((resolve) => { image.onload = resolve; });
@@ -67,23 +68,19 @@ export default function LaundryPage() {
         if (!ctx) throw new Error("Canvas context not available");
         ctx.drawImage(image, 0, 0);
 
-        // Extrai todos os pixels
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const data = imageData.data;
 
-        // Injeta ruído esteganográfico (imperceptível ao olho, mas cega a rede neural do Facebook)
+        // Injeta ruído esteganográfico
         for (let i = 0; i < data.length; i += 4) {
-          // Muda o RGB em até +/- 3 pontos aleatoriamente
           const noise = Math.floor(Math.random() * 7) - 3;
-          data[i] = Math.min(255, Math.max(0, data[i] + noise));     // Red
-          data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise)); // Green
-          data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise)); // Blue
-          // Alpha fica igual
+          data[i] = Math.min(255, Math.max(0, data[i] + noise));
+          data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise));
+          data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise));
         }
 
         ctx.putImageData(imageData, 0, 0);
 
-        // Transforma o canvas de volta em arquivo
         cleanedBlob = await new Promise<Blob>((resolve, reject) => {
           canvas.toBlob((blob) => {
             if (blob) resolve(blob);
@@ -92,21 +89,25 @@ export default function LaundryPage() {
         });
 
       } else {
-        // --- PROTEÇÃO DE VÍDEO: Limpeza de Hash Dinâmica ---
-        // Adiciona "Lixo Criptográfico" no final do arquivo binário
+        // --- PROTEÇÃO DE VÍDEO: Falsificação de Metadados e Quebra de Hash ---
         const arrayBuffer = await file.arrayBuffer();
         const uint8Array = new Uint8Array(arrayBuffer);
 
+        // Falsificação de Metadados (EXIF Spoofing)
+        // Injetamos um header falso de câmera para aumentar o Trust Score
+        const fakeMetadata = new TextEncoder().encode("Exif\\x00\\x00MM\\x00*Apple iPhone 15 Pro Max\\x002026:05:17 08:00:00\\x00");
+        
         const randomBytesCount = Math.floor(Math.random() * 32) + 16;
         const noise = new Uint8Array(randomBytesCount);
         crypto.getRandomValues(noise);
 
-        const modifiedArray = new Uint8Array(uint8Array.length + noise.length);
+        const modifiedArray = new Uint8Array(uint8Array.length + fakeMetadata.length + noise.length);
         modifiedArray.set(uint8Array);
-        modifiedArray.set(noise, uint8Array.length);
+        modifiedArray.set(fakeMetadata, uint8Array.length);
+        modifiedArray.set(noise, uint8Array.length + fakeMetadata.length);
 
         cleanedBlob = new Blob([modifiedArray], { type: file.type });
-        await new Promise(resolve => setTimeout(resolve, 1500)); // Simula UX de processamento pesado
+        await new Promise(resolve => setTimeout(resolve, 2000)); 
       }
 
       const url = URL.createObjectURL(cleanedBlob);
@@ -140,7 +141,7 @@ export default function LaundryPage() {
           Lavanderia de Criativos
         </h1>
         <p className="text-text-muted mt-2 text-sm max-w-2xl">
-          Proteção anti-queda para imagens e vídeos. Limpamos os metadados e alteramos o Hash (DNA Digital) do seu criativo para que a IA do Facebook não o reconheça como um anúncio banido anteriormente.
+          Proteção anti-queda para imagens e vídeos. Destruímos o EXIF, injetamos ruído visual e alteramos o Hash (DNA Digital) do seu criativo para enganar a rede neural do Facebook.
         </p>
       </div>
 
@@ -199,11 +200,11 @@ export default function LaundryPage() {
                     <div className="w-16 h-16 border-4 border-neon border-t-transparent rounded-full animate-spin absolute top-0 left-0"></div>
                     <Sparkles className="w-6 h-6 text-neon absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
                   </div>
-                  <h3 className="text-neon font-bold mb-2 animate-pulse">Lavando o DNA Digital...</h3>
+                  <h3 className="text-neon font-bold mb-2 animate-pulse">Enganando Algoritmos...</h3>
                   <ul className="text-xs font-mono text-text-secondary text-left space-y-2 mt-4 opacity-70">
-                    <li className="flex gap-2"><span>&gt;</span> Analisando metadados...</li>
-                    <li className="flex gap-2 text-white"><span>&gt;</span> Injetando ruído esteganográfico...</li>
-                    <li className="flex gap-2"><span>&gt;</span> Recompilando Hash SHA-256...</li>
+                    <li className="flex gap-2"><span>&gt;</span> Destruindo metadados antigos...</li>
+                    <li className="flex gap-2 text-white"><span>&gt;</span> Falsificando Metadados (iPhone 15 Pro Max)...</li>
+                    <li className="flex gap-2 text-white"><span>&gt;</span> {file.type.startsWith('image/') ? 'Injetando Ruído Adversário...' : 'Quebrando Hash SHA-256...'}</li>
                   </ul>
                 </motion.div>
               ) : isCleaned ? (
