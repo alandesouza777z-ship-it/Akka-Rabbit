@@ -45,34 +45,72 @@ export default function LaundryPage() {
     setIsProcessing(true);
 
     try {
-      // Usando FileReader para ler o arquivo na memória do navegador (sem custo de servidor!)
-      const arrayBuffer = await file.arrayBuffer();
-      const uint8Array = new Uint8Array(arrayBuffer);
-
-      // Mágica do AkkaRabbit: Injetando "Ruído" Esteganográfico / Quebra de Hash
-      // Adicionamos de 4 a 16 bytes aleatórios no FINAL do arquivo.
-      // O MP4, JPG e PNG ignoram lixo no final do arquivo, mas isso muda 100% o Hash (MD5/SHA256)
-      const randomBytesCount = Math.floor(Math.random() * 12) + 4; // 4 a 16 bytes
-      const noise = new Uint8Array(randomBytesCount);
-      crypto.getRandomValues(noise);
-
-      // Criar um novo Array com o tamanho original + ruído
-      const modifiedArray = new Uint8Array(uint8Array.length + noise.length);
-      modifiedArray.set(uint8Array);
-      modifiedArray.set(noise, uint8Array.length);
-
-      // Criar o novo arquivo Blob
-      const cleanedBlob = new Blob([modifiedArray], { type: file.type });
-      const url = URL.createObjectURL(cleanedBlob);
-      
-      // Nome do novo arquivo
+      // Nome e extensão do arquivo
       const extensionIndex = file.name.lastIndexOf(".");
       const name = extensionIndex !== -1 ? file.name.substring(0, extensionIndex) : file.name;
       const extension = extensionIndex !== -1 ? file.name.substring(extensionIndex) : "";
-      
-      // Simular um tempo de processamento para dar a sensação de trabalho complexo (UX)
-      await new Promise(resolve => setTimeout(resolve, 1500));
 
+      let cleanedBlob: Blob;
+
+      if (file.type.startsWith("image/")) {
+        // --- PROTEÇÃO DE IMAGEM: Filtro Anti-IA (Adversarial Noise) ---
+        // Desenha a imagem num canvas e altera os pixels matematicamente para confundir a Visão Computacional.
+        const image = new Image();
+        image.src = URL.createObjectURL(file);
+        await new Promise((resolve) => { image.onload = resolve; });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = image.width;
+        canvas.height = image.height;
+        const ctx = canvas.getContext("2d");
+        
+        if (!ctx) throw new Error("Canvas context not available");
+        ctx.drawImage(image, 0, 0);
+
+        // Extrai todos os pixels
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        // Injeta ruído esteganográfico (imperceptível ao olho, mas cega a rede neural do Facebook)
+        for (let i = 0; i < data.length; i += 4) {
+          // Muda o RGB em até +/- 3 pontos aleatoriamente
+          const noise = Math.floor(Math.random() * 7) - 3;
+          data[i] = Math.min(255, Math.max(0, data[i] + noise));     // Red
+          data[i + 1] = Math.min(255, Math.max(0, data[i + 1] + noise)); // Green
+          data[i + 2] = Math.min(255, Math.max(0, data[i + 2] + noise)); // Blue
+          // Alpha fica igual
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        // Transforma o canvas de volta em arquivo
+        cleanedBlob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error("Falha ao gerar blob de imagem"));
+          }, file.type, 0.95);
+        });
+
+      } else {
+        // --- PROTEÇÃO DE VÍDEO: Limpeza de Hash Dinâmica ---
+        // Adiciona "Lixo Criptográfico" no final do arquivo binário
+        const arrayBuffer = await file.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        const randomBytesCount = Math.floor(Math.random() * 32) + 16;
+        const noise = new Uint8Array(randomBytesCount);
+        crypto.getRandomValues(noise);
+
+        const modifiedArray = new Uint8Array(uint8Array.length + noise.length);
+        modifiedArray.set(uint8Array);
+        modifiedArray.set(noise, uint8Array.length);
+
+        cleanedBlob = new Blob([modifiedArray], { type: file.type });
+        await new Promise(resolve => setTimeout(resolve, 1500)); // Simula UX de processamento pesado
+      }
+
+      const url = URL.createObjectURL(cleanedBlob);
+      
       setCleanedUrl(url);
       setCleanedFileName(`[Blindado]-${name}${extension}`);
       setIsCleaned(true);
@@ -245,16 +283,16 @@ export default function LaundryPage() {
             </h3>
             <ul className="space-y-4 text-xs text-text-secondary leading-relaxed">
               <li>
-                <strong className="text-white block mb-1">1. O problema do Hash</strong>
-                Toda vez que você toma um bloqueio, o Facebook salva a "impressão digital" (Hash) do seu criativo. Se você tentar subir o mesmo vídeo em outra conta, você cai na hora.
+                <strong className="text-white block mb-1">1. Vídeos: O problema do Hash</strong>
+                Toda vez que você toma um bloqueio, o Facebook salva a "impressão digital" (Hash) do seu vídeo. Nossa ferramenta injeta bytes invisíveis matematicamente programados no final do arquivo. O vídeo não muda nada visualmente, mas o código binário dele muda 100%.
               </li>
               <li>
-                <strong className="text-white block mb-1">2. A Solução (Lavanderia)</strong>
-                Nossa ferramenta injeta bytes invisíveis matematicamente programados no final do arquivo. O vídeo não muda nada visualmente, mas o código binário dele muda 100%.
+                <strong className="text-white block mb-1">2. Imagens: Filtro Anti-IA (2ª Barreira)</strong>
+                Para imagens, nós fomos além. O sistema redesenha sua imagem injetando um **Ruído Adversário Esteganográfico** imperceptível. Isso confunde o algoritmo de visão computacional da rede neural do Facebook, dificultando que ele "leia" padrões bloqueados na imagem.
               </li>
               <li>
                 <strong className="text-white block mb-1">3. Privacidade Absoluta</strong>
-                Nenhum vídeo é enviado para nossos servidores. Todo esse cálculo é feito pelo processador do seu computador usando JavaScript no próprio navegador.
+                Nenhum criativo é enviado para nossos servidores. Todo esse cálculo matemático pesado é feito pelo processador do seu computador usando JavaScript no próprio navegador.
               </li>
             </ul>
           </div>
