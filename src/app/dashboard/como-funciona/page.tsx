@@ -182,6 +182,49 @@ export default function DashboardComoFunciona() {
           </div>
         </motion.section>
 
+        {/* Lavanderia de Criativos (Enterprise) */}
+        <motion.section 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+          className="glass-card rounded-xl p-8 border border-neon/20 md:col-span-2"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold text-neon flex items-center gap-2">
+              <Zap /> Lavanderia de Criativos (Blindagem Anti-IA)
+            </h2>
+            <span className="px-2 py-1 bg-neon/10 text-neon text-[10px] uppercase font-mono rounded-sm border border-neon/20">Exclusivo Enterprise</span>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-sm text-text-secondary">
+            <div className="space-y-4">
+              <p>
+                Os seus domínios já estão blindados, mas e os seus criativos? O algoritmo do Facebook analisa o DNA binário (Hash) e o visual (Visão Computacional) de todas as fotos e vídeos. Se você sobe um vídeo que já tomou bloqueio, a conta cai na mesma hora.
+              </p>
+              <p>
+                Nossa Lavanderia de Criativos resolve isso diretamente no seu navegador, hackeando as APIs nativas do HTML5 para processamento criptográfico:
+              </p>
+              <ul className="list-disc pl-5 space-y-2 text-white">
+                <li><strong>Imagens:</strong> Destruição de metadados antigos e injeção de "Ruído Adversário Esteganográfico" nos pixels. Um ruído matematicamente calculado para ser invisível ao olho humano, mas que "cega" a rede neural da plataforma.</li>
+                <li><strong>Vídeos (Cintilação):</strong> Usamos `MediaRecorder` para assistir ao vídeo e regravá-lo em tempo real, injetando quadros pretos a cada 7 frames. A IA tira foto da tela preta!</li>
+              </ul>
+            </div>
+            <div className="bg-black/40 p-5 rounded-lg border border-neon/10 space-y-4">
+              <h3 className="font-bold text-white flex items-center gap-2">
+                <Terminal className="w-4 h-4 text-neon" /> Falsificação EXIF (Spoofing)
+              </h3>
+              <p>
+                Após a recodificação da mídia, o AkkaRabbit escreve um falso cabeçalho EXIF nos bytes binários do arquivo, forjando a origem da foto/vídeo.
+              </p>
+              <p>
+                O arquivo é assinado digitalmente como: <code>Apple iPhone 15 Pro Max | Data Atual</code>.
+              </p>
+              <p className="text-neon font-bold">
+                Resultado: O Facebook confere os metadados profundos e credita alta nota de confiança (Trust Score) para o arquivo, achando que foi gravado naquele exato minuto por um smartphone de última geração (caríssimo). Isso diminui drasticamente as suspeitas sobre o anúncio.
+              </p>
+            </div>
+          </div>
+        </motion.section>
+
       </div>
     </div>
   );

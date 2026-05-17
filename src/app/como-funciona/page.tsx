@@ -144,19 +144,25 @@ export default function ComoFuncionaPublic() {
                 <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none"><Shield className="w-24 h-24 text-warning" /></div>
                 <div className="flex items-center gap-3 mb-4">
                   <h3 className="text-xl font-bold text-warning">Enterprise</h3>
-                  <span className="px-2 py-1 bg-warning/10 text-warning text-[10px] uppercase font-mono rounded-sm border border-warning/20">Poder de Destruição (Retaliação)</span>
+                  <span className="px-2 py-1 bg-warning/10 text-warning text-[10px] uppercase font-mono rounded-sm border border-warning/20">A Máquina de Guerra</span>
                 </div>
                 <p className="text-sm text-text-muted mb-4">
-                  Tudo que os planos anteriores têm, sem limites, mais a função de "Cavalo de Tróia". Se clonarem sua página, o sistema altera o link de checkout deles para o seu. Eles gastam com anúncio, a comissão cai para você.
+                  Tudo que os planos anteriores têm, sem limites, mais a função de "Cavalo de Tróia" (Retaliação de clonadores) e acesso exclusivo à Lavanderia de Criativos.
                 </p>
                 <ul className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-text-secondary">
                   <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> Domínios Ilimitados</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> Volume Ilimitado</li>
                   <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> Função "Retaliação" Ativa</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> Injeção de Checkout Dinâmico</li>
-                  <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> API Dedicada e IP Whitelist</li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> <strong>Lavanderia de Criativos</strong></li>
+                  <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-warning" /> Biometria Comportamental v3.0</li>
                   <li className="flex items-center gap-2 font-bold text-white"><CheckCircle2 className="w-4 h-4 text-warning" /> Grupo VIP de Networking</li>
                 </ul>
+                <div className="mt-4 p-3 bg-black/40 border border-warning/10 rounded-lg">
+                  <h4 className="text-white text-xs font-bold mb-1">O que é a Lavanderia de Criativos?</h4>
+                  <p className="text-xs text-text-muted leading-relaxed">
+                    Um sistema nativo de modificação criptográfica de Vídeos e Imagens. O AkkaRabbit destrói metadados antigos, aplica cintilação imperceptível para quebrar a Visão Computacional do Facebook e forja um novo "DNA Digital" para seus anúncios. Seu criativo se torna "invisível" para a Inteligência Artificial bloqueadora das plataformas.
+                  </p>
+                </div>
               </div>
             </div>
           </section>
