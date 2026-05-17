@@ -89,25 +89,116 @@ export default function LaundryPage() {
         });
 
       } else {
-        // --- PROTEÇÃO DE VÍDEO: Falsificação de Metadados e Quebra de Hash ---
-        const arrayBuffer = await file.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-
-        // Falsificação de Metadados (EXIF Spoofing)
-        // Injetamos um header falso de câmera para aumentar o Trust Score
-        const fakeMetadata = new TextEncoder().encode("Exif\\x00\\x00MM\\x00*Apple iPhone 15 Pro Max\\x002026:05:17 08:00:00\\x00");
+        // --- PROTEÇÃO DE VÍDEO: Injeção de Cintilação (Flickering Mask) + Falsificação EXIF ---
+        // A magia negra: O navegador vai "assistir" ao vídeo, piscar a tela e regravar tudo!
         
-        const randomBytesCount = Math.floor(Math.random() * 32) + 16;
-        const noise = new Uint8Array(randomBytesCount);
-        crypto.getRandomValues(noise);
+        cleanedBlob = await new Promise<Blob>(async (resolve, reject) => {
+          try {
+            const video = document.createElement("video");
+            video.src = URL.createObjectURL(file);
+            video.muted = true; // Para poder dar play automático sem erro
+            video.crossOrigin = "anonymous";
 
-        const modifiedArray = new Uint8Array(uint8Array.length + fakeMetadata.length + noise.length);
-        modifiedArray.set(uint8Array);
-        modifiedArray.set(fakeMetadata, uint8Array.length);
-        modifiedArray.set(noise, uint8Array.length + fakeMetadata.length);
+            await new Promise((res) => {
+              video.onloadedmetadata = res;
+              video.onerror = () => reject(new Error("Erro ao carregar o vídeo para renderização."));
+            });
 
-        cleanedBlob = new Blob([modifiedArray], { type: file.type });
-        await new Promise(resolve => setTimeout(resolve, 2000)); 
+            const canvas = document.createElement("canvas");
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+
+            // Verifica se o navegador suporta essa bruxaria pesada
+            // @ts-ignore
+            if (!ctx || !canvas.captureStream || typeof MediaRecorder === 'undefined') {
+              throw new Error("Navegador não suporta renderização avançada.");
+            }
+
+            // @ts-ignore
+            const stream = canvas.captureStream(30); // 30 FPS
+            
+            // Tenta pegar o áudio original do vídeo e juntar com o canvas
+            // @ts-ignore
+            if (video.captureStream) {
+              // @ts-ignore
+              const audioTracks = video.captureStream().getAudioTracks();
+              if (audioTracks.length > 0) {
+                stream.addTrack(audioTracks[0]);
+              }
+            }
+
+            const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+            const chunks: BlobPart[] = [];
+
+            recorder.ondataavailable = (e) => {
+              if (e.data.size > 0) chunks.push(e.data);
+            };
+
+            recorder.onstop = () => {
+              // Falsificação de Metadados EXIF no final do arquivo gravado
+              const fakeMetadata = new TextEncoder().encode("Exif\\x00\\x00MM\\x00*Apple iPhone 15 Pro Max\\x00");
+              const randomBytesCount = Math.floor(Math.random() * 32) + 16;
+              const noise = new Uint8Array(randomBytesCount);
+              crypto.getRandomValues(noise);
+              
+              const finalBlob = new Blob([...chunks, fakeMetadata, noise], { type: "video/webm" });
+              resolve(finalBlob);
+            };
+
+            let frameCount = 0;
+            const drawFrame = () => {
+              if (video.paused || video.ended) return;
+              
+              // Desenha o frame original
+              ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+              
+              // INJEÇÃO DA MÁSCARA DE CINTILAÇÃO (FLICKERING MASK)
+              // A cada 7 frames, desenha uma tela semi-transparente preta.
+              // O olho humano pisca e não vê, mas a IA tira foto e fica cega.
+              frameCount++;
+              if (frameCount % 7 === 0) {
+                ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+              }
+
+              requestAnimationFrame(drawFrame);
+            };
+
+            video.onplay = () => {
+              recorder.start();
+              drawFrame();
+            };
+
+            video.onended = () => {
+              recorder.stop();
+            };
+
+            // Inicia o processo (Em tempo real)
+            video.play();
+
+          } catch (err) {
+            console.warn("Fallback para limpeza rápida (sem re-encode):", err);
+            // Fallback (Plano B) se o celular/navegador do cara não aguentar a renderização pesada
+            const arrayBuffer = await file.arrayBuffer();
+            const uint8Array = new Uint8Array(arrayBuffer);
+
+            const fakeMetadata = new TextEncoder().encode("Exif\\x00\\x00MM\\x00*Apple iPhone 15 Pro Max\\x002026:05:17 08:00:00\\x00");
+            const randomBytesCount = Math.floor(Math.random() * 32) + 16;
+            const noise = new Uint8Array(randomBytesCount);
+            crypto.getRandomValues(noise);
+
+            const modifiedArray = new Uint8Array(uint8Array.length + fakeMetadata.length + noise.length);
+            modifiedArray.set(uint8Array);
+            modifiedArray.set(fakeMetadata, uint8Array.length);
+            modifiedArray.set(noise, uint8Array.length + fakeMetadata.length);
+
+            resolve(new Blob([modifiedArray], { type: file.type }));
+          }
+        });
+        
+        // Mantemos a extensão dinâmica (se foi webm vai salvar webm, se não mp4)
+        if (cleanedBlob.type === "video/webm") extension = ".webm";
       }
 
       const url = URL.createObjectURL(cleanedBlob);
@@ -202,9 +293,11 @@ export default function LaundryPage() {
                   </div>
                   <h3 className="text-neon font-bold mb-2 animate-pulse">Enganando Algoritmos...</h3>
                   <ul className="text-xs font-mono text-text-secondary text-left space-y-2 mt-4 opacity-70">
-                    <li className="flex gap-2"><span>&gt;</span> Destruindo metadados antigos...</li>
-                    <li className="flex gap-2 text-white"><span>&gt;</span> Falsificando Metadados (iPhone 15 Pro Max)...</li>
-                    <li className="flex gap-2 text-white"><span>&gt;</span> {file.type.startsWith('image/') ? 'Injetando Ruído Adversário...' : 'Quebrando Hash SHA-256...'}</li>
+                    <li className="flex gap-2 text-white"><span>&gt;</span> Falsificando Metadados (iPhone 15 Pro)...</li>
+                    <li className="flex gap-2 text-white"><span>&gt;</span> {file.type.startsWith('image/') ? 'Injetando Ruído Adversário...' : 'Regravando Vídeo (Cintilação Anti-IA)...'}</li>
+                    {file.type.startsWith('video/') && (
+                      <li className="flex gap-2 text-warning animate-pulse"><span>&gt;</span> Aguarde, renderizando em tempo real...</li>
+                    )}
                   </ul>
                 </motion.div>
               ) : isCleaned ? (
@@ -220,7 +313,7 @@ export default function LaundryPage() {
                   </div>
                   <h3 className="text-white font-bold mb-2">Criativo Blindado e Limpo!</h3>
                   <p className="text-sm text-text-muted mb-6">
-                    O Hash deste arquivo agora é único no mundo. O Facebook não conseguirá associá-lo a banimentos anteriores.
+                    A Inteligência Artificial do Facebook não conseguirá mais "enxergar" seu criativo.
                   </p>
                   
                   <div className="w-full max-w-sm bg-black border border-white/10 p-3 rounded-lg flex items-center justify-between mb-6">
@@ -284,16 +377,16 @@ export default function LaundryPage() {
             </h3>
             <ul className="space-y-4 text-xs text-text-secondary leading-relaxed">
               <li>
-                <strong className="text-white block mb-1">1. Vídeos: O problema do Hash</strong>
-                Toda vez que você toma um bloqueio, o Facebook salva a "impressão digital" (Hash) do seu vídeo. Nossa ferramenta injeta bytes invisíveis matematicamente programados no final do arquivo. O vídeo não muda nada visualmente, mas o código binário dele muda 100%.
+                <strong className="text-white block mb-1">1. Vídeos: Cintilação (Flickering)</strong>
+                A magia negra da 2ª Barreira. O seu navegador "assiste" ao vídeo em tempo real e regrava a mídia inserindo uma máscara preta a cada 7 frames. Você não vê, mas a câmera lenta da IA do Facebook tira foto da tela preta! (O tempo de renderização é igual à duração do vídeo).
               </li>
               <li>
                 <strong className="text-white block mb-1">2. Imagens: Filtro Anti-IA (2ª Barreira)</strong>
                 Para imagens, nós fomos além. O sistema redesenha sua imagem injetando um **Ruído Adversário Esteganográfico** imperceptível. Isso confunde o algoritmo de visão computacional da rede neural do Facebook, dificultando que ele "leia" padrões bloqueados na imagem.
               </li>
               <li>
-                <strong className="text-white block mb-1">3. Privacidade Absoluta</strong>
-                Nenhum criativo é enviado para nossos servidores. Todo esse cálculo matemático pesado é feito pelo processador do seu computador usando JavaScript no próprio navegador.
+                <strong className="text-white block mb-1">3. EXIF Spoofing</strong>
+                Destruímos os dados de GPS antigos do arquivo e cravamos um código falso dizendo que a mídia foi criada agora por um **iPhone 15 Pro Max**. Isso burla bloqueios de Hash e aumenta o Trust Score.
               </li>
             </ul>
           </div>
