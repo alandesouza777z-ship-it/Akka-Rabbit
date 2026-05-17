@@ -149,11 +149,11 @@ export default function LaundryPage() {
         {/* Workspace Principal */}
         <div className="md:col-span-2 space-y-6">
           <div 
-            className={\`glass-card rounded-xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center min-h-[300px] text-center
-              \${file && !isCleaned ? 'border-neon bg-neon/5' : ''}
-              \${isCleaned ? 'border-green-500 bg-green-500/5' : ''}
-              \${!file ? 'border-white/10 hover:border-white/20 hover:bg-white/5 cursor-pointer' : ''}
-            \`}
+            className={`glass-card rounded-xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center min-h-[300px] text-center
+              ${file && !isCleaned ? 'border-neon bg-neon/5' : ''}
+              ${isCleaned ? 'border-green-500 bg-green-500/5' : ''}
+              ${!file ? 'border-white/10 hover:border-white/20 hover:bg-white/5 cursor-pointer' : ''}
+            `}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
             onClick={() => !file && fileInputRef.current?.click()}
