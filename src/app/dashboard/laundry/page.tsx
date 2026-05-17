@@ -48,7 +48,7 @@ export default function LaundryPage() {
       // Nome e extensão do arquivo
       const extensionIndex = file.name.lastIndexOf(".");
       const name = extensionIndex !== -1 ? file.name.substring(0, extensionIndex) : file.name;
-      const extension = extensionIndex !== -1 ? file.name.substring(extensionIndex) : "";
+      let extension = extensionIndex !== -1 ? file.name.substring(extensionIndex) : "";
 
       let cleanedBlob: Blob;
 
