@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { UploadCloud, Sparkles, FileVideo, FileImage, ShieldCheck, Loader2, Download, AlertTriangle } from "lucide-react";
+import { UploadCloud, Sparkles, FileVideo, FileImage, ShieldCheck, Loader2, Download, AlertTriangle, Lock } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 export default function LaundryPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -11,6 +13,21 @@ export default function LaundryPage() {
   const [cleanedUrl, setCleanedUrl] = useState<string | null>(null);
   const [cleanedFileName, setCleanedFileName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [planTier, setPlanTier] = useState<string | null>(null);
+  const [isLoadingPlan, setIsLoadingPlan] = useState(true);
+
+  useEffect(() => {
+    async function fetchPlan() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data } = await supabase.from('users').select('plan_tier').eq('id', user.id).single();
+        if (data) setPlanTier(data.plan_tier);
+      }
+      setIsLoadingPlan(false);
+    }
+    fetchPlan();
+  }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -236,20 +253,41 @@ export default function LaundryPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Workspace Principal */}
-        <div className="md:col-span-2 space-y-6">
-          <div 
-            className={`glass-card rounded-xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center min-h-[300px] text-center
-              ${file && !isCleaned ? 'border-neon bg-neon/5' : ''}
-              ${isCleaned ? 'border-green-500 bg-green-500/5' : ''}
-              ${!file ? 'border-white/10 hover:border-white/20 hover:bg-white/5 cursor-pointer' : ''}
-            `}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onClick={() => !file && fileInputRef.current?.click()}
-          >
+      {isLoadingPlan ? (
+        <div className="flex justify-center items-center py-20">
+          <Loader2 className="w-8 h-8 text-neon animate-spin" />
+        </div>
+      ) : planTier !== 'enterprise' ? (
+        <div className="glass-card rounded-xl p-12 text-center border-dashed border-2 border-neon/20 flex flex-col items-center max-w-2xl mx-auto mt-12">
+          <div className="w-20 h-20 bg-neon/10 rounded-full flex items-center justify-center mb-6 relative">
+            <Sparkles className="w-10 h-10 text-neon" />
+            <div className="absolute -bottom-2 -right-2 bg-black border border-white/10 rounded-full p-2">
+              <Lock className="w-4 h-4 text-text-muted" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-4">Lavanderia Nível Militar</h2>
+          <p className="text-text-secondary mb-8 leading-relaxed max-w-md">
+            A falsificação de metadados EXIF e a máscara de cintilação anti-IA para vídeos exigem alto poder computacional e protocolos exclusivos de conexão. Esta ferramenta é restrita ao <strong className="text-neon">Plano Enterprise</strong>.
+          </p>
+          <Link href="/dashboard/settings" className="btn-neon-filled px-8 py-3">
+            Fazer Upgrade para Enterprise
+          </Link>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Workspace Principal */}
+          <div className="md:col-span-2 space-y-6">
+            <div 
+              className={`glass-card rounded-xl p-8 border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center min-h-[300px] text-center
+                ${file && !isCleaned ? 'border-neon bg-neon/5' : ''}
+                ${isCleaned ? 'border-green-500 bg-green-500/5' : ''}
+                ${!file ? 'border-white/10 hover:border-white/20 hover:bg-white/5 cursor-pointer' : ''}
+              `}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              onClick={() => !file && fileInputRef.current?.click()}
+            >
             <input 
               type="file" 
               ref={fileInputRef} 
@@ -390,9 +428,9 @@ export default function LaundryPage() {
               </li>
             </ul>
           </div>
+          </div>
         </div>
-
-      </div>
+      )}
     </div>
   );
 }
