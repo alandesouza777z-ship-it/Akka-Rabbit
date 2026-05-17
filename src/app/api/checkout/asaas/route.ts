@@ -10,9 +10,9 @@ export async function POST(request: NextRequest) {
 
     // Definir valores baseados no plano
     const priceMap: Record<string, number> = {
-      starter: 97.00,
-      pro: 197.00,
-      enterprise: 497.00
+      starter: 147.00,
+      pro: 297.00,
+      enterprise: 697.00
     };
 
     const priceValue = priceMap[planTier] || 197.00;
