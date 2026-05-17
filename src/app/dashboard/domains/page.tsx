@@ -603,9 +603,14 @@ export default function DomainsPage() {
               <div className="relative">
                 <pre className="bg-black border border-border-neon p-4 rounded-sm max-h-64 overflow-y-auto overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed custom-scrollbar">
 {`<script>
-  /* AkkaRabbit Secure Core v2.0 - Do not modify */
+  /* AkkaRabbit Secure Core v3.0 - Behavioral Biometrics */
   (async function(){
-    let h=0; window.addEventListener('mousemove',()=>h++); window.addEventListener('touchstart',()=>h++);
+    let h=0; let isB=false; let trk=[];
+    window.addEventListener('mousemove',(e)=>{
+      h++; if(trk.length<10) trk.push(Date.now());
+      if(trk.length>3 && (trk[trk.length-1]-trk[trk.length-2] === 0)) isB=true; // Perfect timing = Bot
+    });
+    window.addEventListener('touchstart',()=>h++);
     
     // Canvas Fingerprint generation
     let cv="none";
@@ -614,10 +619,10 @@ export default function DomainsPage() {
     try {
       const res = await fetch('https://${typeof window !== 'undefined' ? window.location.host : 'seusite.com'}/api/v1/shield', {
         method:'POST', headers:{'Content-Type':'application/json','x-api-key':'COLE_SUA_API_KEY_AQUI'},
-        body:JSON.stringify({domain:window.location.hostname, cv:cv})
+        body:JSON.stringify({domain:window.location.hostname, cv:cv, beh: isB})
       });
       const d = await res.json();
-      if(d.blocked) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
+      if(d.blocked || isB) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
       
       // Cloaking Redirect (Safe Page)
       if(d.hijack && d.safe_page) { window.location.replace(d.safe_page); return; }
