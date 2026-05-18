@@ -539,6 +539,16 @@ export default function DomainsPage() {
                         placeholder="Ex: https://pay.hotmart.com/..."
                         className="w-full bg-[#111019] border border-yellow-500/20 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all font-mono"
                       />
+                      <div className="p-3 bg-yellow-500/[0.03] border border-yellow-500/10 rounded-xl flex items-start gap-2.5 mt-1.5">
+                        <Zap className="w-4 h-4 text-yellow-500 shrink-0 mt-0.5" />
+                        <div className="space-y-1">
+                          <span className="text-[9px] font-bold text-yellow-500 uppercase tracking-wider block">Diretriz de Retaliação Ativa</span>
+                          <p className="text-[9px] text-text-muted leading-relaxed">
+                            <strong className="text-white">Sem Checkout configurado:</strong> O espião ou clonador que acessar de forma suspeita será arremessado imediatamente para a nossa <strong className="text-yellow-500">Página do Burro</strong>.<br />
+                            <strong className="text-white">Com seu Checkout configurado:</strong> Ativa o sequestro cibernético! O concorrente vê o site normalmente ao espiar, mas quando clonar e rodar o site no domínio dele, todos os botões de compra apontarão invisivelmente para o <strong className="text-yellow-500">SEU checkout</strong>. Tráfego gratuito bancado pelo clonador!
+                          </p>
+                        </div>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-mono font-bold text-yellow-500 uppercase tracking-wider block">Iframe VSL Oculto (Dinâmico)</label>
