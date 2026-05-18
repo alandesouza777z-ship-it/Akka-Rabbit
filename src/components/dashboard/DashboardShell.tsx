@@ -20,6 +20,7 @@ import {
   Users,
   Sparkles,
   Bug,
+  CreditCard,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -51,6 +52,7 @@ const navItems = [
   { href: "/dashboard/networking", label: "Networking", icon: Users },
   { href: "/dashboard/rewards", label: "Premiações", icon: Trophy },
   { href: "/dashboard/bugbounty", label: "Bug Bounty", icon: Bug },
+  { href: "/dashboard/planos", label: "Planos", icon: CreditCard },
   { href: "/dashboard/support", label: "Suporte", icon: Headset },
   { href: "/dashboard/settings", label: "Configurações", icon: Settings },
 ];
