@@ -14,8 +14,12 @@ import {
   X,
   Loader2,
   Zap,
-  Link,
+  Link as LinkIcon,
   Crown,
+  Share2,
+  Code,
+  Layers,
+  Sparkles,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -36,18 +40,27 @@ interface Domain {
 
 export default function DomainsPage() {
   const [domains, setDomains] = useState<Domain[]>([]);
+  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newDomain, setNewDomain] = useState("");
   const [adding, setAdding] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
-  const [showScriptForDomain, setShowScriptForDomain] = useState<string | null>(null);
   const [userPlan, setUserPlan] = useState<string>("starter");
-  const [newCheckoutUrl, setNewCheckoutUrl] = useState("");
-  const [newVslUrl, setNewVslUrl] = useState("");
 
-  const fetchDomains = useCallback(async () => {
+  // Form States (Matches the Premium Uploaded Design)
+  const [domainUrl, setDomainUrl] = useState("");
+  const [trafficSource, setTrafficSource] = useState("Facebook Ads");
+  const [offerMethod, setOfferMethod] = useState<"shield" | "safepage">("shield");
+  const [blackPageUrl, setBlackPageUrl] = useState("");
+  const [safePageUrl, setSafePageUrl] = useState("");
+  const [protectionMode, setProtectionMode] = useState<"auto" | "manual">("manual");
+  const [checkoutUrl, setCheckoutUrl] = useState("");
+  const [vslUrl, setVslUrl] = useState("");
+  const [honeypotEnabled, setHoneypotEnabled] = useState(false);
+  const [canvasFingerprint, setCanvasFingerprint] = useState(false);
+
+  const fetchDomains = useCallback(async (selectId?: string) => {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
@@ -66,7 +79,19 @@ export default function DomainsPage() {
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
-    setDomains(data || []);
+    const fetchedDomains = data || [];
+    setDomains(fetchedDomains);
+
+    if (fetchedDomains.length > 0) {
+      // Keep previous selection or select first
+      const toSelect = selectId 
+        ? fetchedDomains.find(d => d.id === selectId) 
+        : fetchedDomains[0];
+      handleSelectDomain(toSelect || fetchedDomains[0]);
+    } else {
+      setSelectedDomain(null);
+      resetForm();
+    }
     setLoading(false);
   }, []);
 
@@ -74,9 +99,40 @@ export default function DomainsPage() {
     fetchDomains();
   }, [fetchDomains]);
 
-  const addDomain = async () => {
-    if (!newDomain.trim()) return;
-    setAdding(true);
+  const handleSelectDomain = (domain: Domain) => {
+    setSelectedDomain(domain);
+    setDomainUrl(domain.domain_url);
+    setBlackPageUrl(domain.checkout_url || "");
+    setSafePageUrl(domain.safe_page_url || "");
+    setOfferMethod(domain.cloak_bots ? "safepage" : "shield");
+    setCheckoutUrl(domain.checkout_url || "");
+    setVslUrl(domain.vsl_url || "");
+    setHoneypotEnabled(domain.honeypot_enabled);
+    setCanvasFingerprint(domain.canvas_fingerprint);
+  };
+
+  const resetForm = () => {
+    setDomainUrl("");
+    setBlackPageUrl("");
+    setSafePageUrl("");
+    setOfferMethod("shield");
+    setCheckoutUrl("");
+    setVslUrl("");
+    setHoneypotEnabled(false);
+    setCanvasFingerprint(false);
+  };
+
+  const handleCreateNew = () => {
+    setSelectedDomain(null);
+    resetForm();
+  };
+
+  const saveCampaign = async () => {
+    if (!domainUrl.trim()) {
+      setError("O nome/URL do domínio é obrigatório.");
+      return;
+    }
+    setSaving(true);
     setError("");
 
     try {
@@ -84,33 +140,48 @@ export default function DomainsPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const insertData: Record<string, unknown> = {
-        user_id: user.id,
-        domain_url: newDomain.trim().replace(/^https?:\/\//, "").replace(/\/$/, ""),
-        status: "pending",
+      const formattedDomain = domainUrl.trim().replace(/^https?:\/\//, "").replace(/\/$/, "");
+
+      const updateData = {
+        domain_url: formattedDomain,
+        checkout_url: blackPageUrl.trim() || null,
+        safe_page_url: safePageUrl.trim() || null,
+        cloak_bots: offerMethod === "safepage",
+        honeypot_enabled: honeypotEnabled,
+        canvas_fingerprint: canvasFingerprint,
+        // Enterprise specific values
+        vsl_url: vslUrl.trim() || null,
       };
-      // Enterprise: include checkout URL and VSL URL if provided
-      if (userPlan === "enterprise") {
-        if (newCheckoutUrl.trim()) insertData.checkout_url = newCheckoutUrl.trim();
-        if (newVslUrl.trim()) insertData.vsl_url = newVslUrl.trim();
+
+      if (selectedDomain) {
+        // Edit Mode
+        const { error: updateError } = await supabase
+          .from("domains")
+          .update(updateData)
+          .eq("id", selectedDomain.id);
+
+        if (updateError) throw updateError;
+        await fetchDomains(selectedDomain.id);
+      } else {
+        // Create Mode
+        const { data: inserted, error: insertError } = await supabase
+          .from("domains")
+          .insert({
+            user_id: user.id,
+            status: "pending",
+            ...updateData
+          })
+          .select()
+          .single();
+
+        if (insertError) throw insertError;
+        await fetchDomains(inserted.id);
       }
-
-      const { error: insertError } = await supabase.from("domains").insert(insertData);
-
-      if (insertError) {
-        setError(insertError.message);
-        return;
-      }
-
-      setNewDomain("");
-      setNewCheckoutUrl("");
-      setNewVslUrl("");
-      setShowAddModal(false);
-      fetchDomains();
-    } catch {
-      setError("Erro ao adicionar domínio.");
+      alert("Campanha de proteção salva com sucesso!");
+    } catch (err: any) {
+      setError(err.message || "Erro ao salvar campanha.");
     } finally {
-      setAdding(false);
+      setSaving(false);
     }
   };
 
@@ -119,515 +190,459 @@ export default function DomainsPage() {
 
     const supabase = createClient();
     await supabase.from("domains").delete().eq("id", id);
-    fetchDomains();
-  };
-
-  const toggleShield = async (id: string, enabled: boolean) => {
-    const supabase = createClient();
-    await supabase
-      .from("domains")
-      .update({ shield_enabled: !enabled })
-      .eq("id", id);
-    fetchDomains();
-  };
-
-  const updateCheckoutUrl = async (id: string, url: string) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ checkout_url: url || null }).eq("id", id);
-    fetchDomains();
-  };
-
-  const updateVslUrl = async (id: string, url: string) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ vsl_url: url || null }).eq("id", id);
-    fetchDomains();
-  };
-
-  const toggleCloakBots = async (id: string, enabled: boolean) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ cloak_bots: !enabled }).eq("id", id);
-    fetchDomains();
-  };
-
-  const updateSafePageUrl = async (id: string, url: string) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ safe_page_url: url || null }).eq("id", id);
-    fetchDomains();
-  };
-
-  const toggleHoneypot = async (id: string, enabled: boolean) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ honeypot_enabled: !enabled }).eq("id", id);
-    fetchDomains();
-  };
-
-  const toggleCanvasFingerprint = async (id: string, enabled: boolean) => {
-    const supabase = createClient();
-    await supabase.from("domains").update({ canvas_fingerprint: !enabled }).eq("id", id);
-    fetchDomains();
+    await fetchDomains();
   };
 
   const copyToken = (token: string) => {
     navigator.clipboard.writeText(token);
     setCopiedToken(token);
-    setShowScriptForDomain(token);
     setTimeout(() => setCopiedToken(null), 2000);
   };
 
-  const statusColors: Record<string, string> = {
-    active: "text-neon bg-neon/10",
-    inactive: "text-text-muted bg-white/5",
-    pending: "text-warning bg-warning/10",
-  };
+  const trafficSources = [
+    { name: "Facebook Ads", icon: "🌐" },
+    { name: "Google Ads", icon: "🔍" },
+    { name: "TikTok Ads", icon: "🎵" },
+    { name: "Kwai Ads", icon: "🧡" },
+    { name: "Taboola", icon: "📰" },
+    { name: "Outbrain", icon: "💡" },
+    { name: "MGID", icon: "📊" },
+    { name: "Outro", icon: "🔗" },
+  ];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-8 max-w-6xl mx-auto pb-20">
+      {/* Top Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/[0.04] pb-6">
         <div>
-          <h1 className="font-mono text-xl font-bold text-white">
-            <span className="text-neon">&gt;</span> Domínios Protegidos
+          <h1 className="font-mono text-2xl font-bold text-white flex items-center gap-3">
+            <Globe className="w-8 h-8 text-neon" />
+            Configuração de Campanhas
           </h1>
           <p className="text-text-muted text-sm mt-1">
-            Gerencie os domínios sob proteção do Shield
+            Proteja suas ofertas contra espionagem, clonadores e robôs analisadores.
           </p>
         </div>
         <button
-          onClick={() => setShowAddModal(true)}
-          className="btn-neon-filled flex items-center gap-2 text-xs"
-          id="add-domain-btn"
+          onClick={handleCreateNew}
+          className="btn-neon-filled flex items-center gap-2 text-xs py-2.5 px-5"
         >
           <Plus className="w-4 h-4" />
-          Adicionar Domínio
+          Nova Campanha
         </button>
       </div>
 
-      {/* Tutorial Banner with Premium Illustrations */}
-      <div className="glass-card rounded-sm p-6 mb-6">
-        <h3 className="font-mono text-white text-lg font-bold flex items-center gap-2 mb-6">
-          <AlertCircle className="w-5 h-5 text-neon" />
-          Guia de Integração Rápida
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          
-          {/* Step 1 */}
-          <div className="flex flex-col relative">
-            <div className="absolute top-4 left-1/2 w-full h-[1px] bg-border-neon/30 hidden md:block" style={{ transform: 'translateX(50%)' }}></div>
-            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
-                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-                <line x1="8" y1="21" x2="16" y2="21"></line>
-                <line x1="12" y1="17" x2="12" y2="21"></line>
-                <circle cx="12" cy="10" r="3"></circle>
-                <line x1="12" y1="7" x2="12" y2="13"></line>
-                <line x1="9" y1="10" x2="15" y2="10"></line>
-              </svg>
-              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">1</div>
-            </div>
-            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Cadastre o Domínio</h4>
-            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
-              Clique em <span className="text-neon">Adicionar Domínio</span> e insira a URL do seu funil (ex: sua-oferta.com).
-            </p>
-          </div>
-
-          {/* Step 2 */}
-          <div className="flex flex-col relative">
-            <div className="absolute top-4 left-1/2 w-full h-[1px] bg-border-neon/30 hidden md:block" style={{ transform: 'translateX(50%)' }}></div>
-            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                <polyline points="13 13 15 15 19 11"></polyline>
-              </svg>
-              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">2</div>
-            </div>
-            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Copie o Script</h4>
-            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
-              Clique no ícone de cópia ao lado do Token para revelar seu código de proteção exclusivo.
-            </p>
-          </div>
-
-          {/* Step 3 */}
-          <div className="flex flex-col relative">
-            <div className="w-12 h-12 rounded-sm bg-black border border-neon/50 flex items-center justify-center mb-4 z-10 relative shadow-[0_0_15px_rgba(0,255,65,0.15)] mx-auto md:mx-0">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-neon">
-                <polyline points="16 18 22 12 16 6"></polyline>
-                <polyline points="8 6 2 12 8 18"></polyline>
-                <line x1="12" y1="2" x2="12" y2="22" strokeDasharray="4 4"></line>
-              </svg>
-              <div className="absolute -top-2 -right-2 w-5 h-5 bg-neon text-black rounded-full text-[10px] font-bold flex items-center justify-center font-mono">3</div>
-            </div>
-            <h4 className="font-mono text-sm text-white font-bold mb-2 text-center md:text-left">Injete na Página</h4>
-            <p className="text-text-muted text-xs leading-relaxed text-center md:text-left">
-              Cole no <code className="text-neon text-[10px]">&lt;head&gt;</code> do site. O status mudará para <span className="text-neon">Active</span> no 1º acesso!
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Domain List */}
-      {loading ? (
-        <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-6 h-6 text-neon animate-spin" />
-        </div>
-      ) : domains.length === 0 ? (
-        <div className="glass-card rounded-sm p-12 text-center">
-          <Globe className="w-12 h-12 text-text-muted mx-auto mb-4" />
-          <h3 className="font-mono text-white font-semibold mb-2">
-            Nenhum domínio registrado
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        
+        {/* LEFT COLUMN: Active Protections List */}
+        <div className="lg:col-span-1 space-y-4">
+          <h3 className="font-mono text-xs font-bold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-2">
+            <Layers className="w-3.5 h-3.5" /> Domínios Ativos ({domains.length})
           </h3>
-          <p className="text-text-muted text-sm mb-6">
-            Adicione seu primeiro domínio para ativar a proteção Shield.
-          </p>
-          <button
-            onClick={() => setShowAddModal(true)}
-            className="btn-neon-filled inline-flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Adicionar Domínio
-          </button>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {domains.map((domain, i) => (
-            <motion.div
-              key={domain.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.05 }}
-              className="glass-card rounded-sm p-5"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                {/* Domain Info */}
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <Globe className="w-4 h-4 text-neon" />
-                    <span className="font-mono text-white font-semibold">
-                      {domain.domain_url}
+          
+          {loading ? (
+            <div className="flex items-center justify-center py-10">
+              <Loader2 className="w-5 h-5 text-neon animate-spin" />
+            </div>
+          ) : domains.length === 0 ? (
+            <div className="glass-card rounded-xl p-6 text-center border border-white/5 bg-white/[0.01]">
+              <p className="text-xs text-text-muted leading-relaxed">Nenhum domínio cadastrado ainda. Use o painel ao lado para criar o seu primeiro!</p>
+            </div>
+          ) : (
+            <div className="space-y-2 max-h-[70vh] overflow-y-auto pr-1 custom-scrollbar">
+              {domains.map((dom) => (
+                <button
+                  key={dom.id}
+                  onClick={() => handleSelectDomain(dom)}
+                  className={`w-full text-left p-3.5 rounded-xl border transition-all flex flex-col gap-1.5 cursor-pointer
+                    ${selectedDomain?.id === dom.id 
+                      ? 'bg-neon/10 border-neon/50 shadow-[0_0_15px_rgba(0,255,65,0.05)]' 
+                      : 'bg-black/40 border-white/5 hover:bg-white/[0.02] hover:border-white/10'}`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <span className="font-mono text-xs font-bold text-white truncate max-w-[130px]">
+                      {dom.domain_url}
                     </span>
-                    <span
-                      className={`px-2 py-0.5 text-[10px] font-bold font-mono uppercase rounded-sm ${
-                        statusColors[domain.status] || statusColors.pending
-                      }`}
-                    >
-                      {domain.status}
+                    <span className={`px-1.5 py-0.5 text-[8px] font-mono font-bold rounded uppercase
+                      ${dom.status === 'active' ? 'bg-neon/20 text-neon' : 'bg-warning/20 text-warning'}`}>
+                      {dom.status}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] text-text-muted">
-                      TOKEN:
+                  <div className="flex items-center justify-between text-[10px] text-text-muted w-full">
+                    <span className="font-mono text-[9px] opacity-75">
+                      {dom.verification_token.slice(0, 8)}...
                     </span>
-                    <code className="font-mono text-[10px] text-text-secondary bg-bg-secondary px-2 py-0.5 border border-border-neon">
-                      {domain.verification_token.slice(0, 16)}...
-                    </code>
+                    <div className="flex items-center gap-1.5">
+                      <span className={`w-1.5 h-1.5 rounded-full ${dom.shield_enabled ? 'bg-neon' : 'bg-red-500'}`} />
+                      <span>{dom.shield_enabled ? 'ON' : 'OFF'}</span>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: Premium Campaign Configurator (Panda Style) */}
+        <div className="lg:col-span-3 space-y-6">
+          <div className="glass-card rounded-2xl p-6 md:p-8 border border-white/[0.04] bg-[#07060E] relative overflow-hidden">
+            
+            {/* Dynamic Background Effect */}
+            <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-neon/5 rounded-full blur-[100px] pointer-events-none" />
+
+            {error && (
+              <div className="flex items-center gap-3 p-4 mb-6 border border-red-500/20 bg-red-500/5 text-red-400 text-xs font-mono rounded-xl">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div className="space-y-6">
+              
+              {/* 1. Nome da Campanha / Domínio */}
+              <div className="space-y-2">
+                <label className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                  <span className="text-neon">&gt;</span> Nome / URL do Domínio *
+                </label>
+                <input
+                  type="text"
+                  value={domainUrl}
+                  onChange={(e) => setDomainUrl(e.target.value)}
+                  placeholder="Ex: minha-oferta.com"
+                  className="w-full bg-[#111019] border border-white/5 hover:border-white/10 focus:border-neon rounded-xl px-4 py-3 text-sm text-white focus:outline-none transition-all font-mono"
+                />
+              </div>
+
+              {/* 2. Fonte de Tráfego */}
+              <div className="space-y-3">
+                <label className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                  🎯 Fonte de Tráfego
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {trafficSources.map((source) => (
                     <button
-                      onClick={() => copyToken(domain.verification_token)}
-                      className="p-1 hover:text-neon transition-colors"
-                      title="Copiar token"
+                      key={source.name}
+                      onClick={() => setTrafficSource(source.name)}
+                      className={`flex items-center justify-center gap-2 py-3 px-3 rounded-xl border text-xs font-mono transition-all cursor-pointer
+                        ${trafficSource === source.name
+                          ? 'border-neon bg-neon/5 text-white font-bold shadow-[0_0_15px_rgba(0,255,65,0.05)]'
+                          : 'border-white/5 bg-[#111019] text-text-muted hover:border-white/10 hover:text-white'}`}
                     >
-                      {copiedToken === domain.verification_token ? (
-                        <Check className="w-3 h-3 text-neon" />
-                      ) : (
-                        <Copy className="w-3 h-3 text-text-muted" />
-                      )}
+                      <span className="text-sm">{source.icon}</span>
+                      <span>{source.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 3. Método de Oferta (Illustrated Cards) */}
+              <div className="space-y-3">
+                <label className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                  💻 Método de Oferta
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Card A: Proteção Blindada */}
+                  <button
+                    onClick={() => setOfferMethod("shield")}
+                    className={`text-left rounded-2xl border overflow-hidden relative group transition-all duration-300 cursor-pointer flex flex-col h-[180px]
+                      ${offerMethod === "shield"
+                        ? 'border-neon shadow-[0_0_25px_rgba(0,255,65,0.08)] bg-neon/[0.02]'
+                        : 'border-white/5 bg-[#111019] hover:border-white/10 opacity-70 hover:opacity-100'}`}
+                  >
+                    <div className="flex-1 w-full relative overflow-hidden">
+                      <img 
+                        src="/akkarabbit_protection_banner.png" 
+                        alt="Proteção AkkaRabbit"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black to-black/10" />
+                      
+                      {/* Brand logos overlay */}
+                      <div className="absolute top-3 left-3 flex gap-1">
+                        <span className="text-[9px] bg-black/60 backdrop-blur border border-white/10 px-2 py-0.5 rounded text-white font-mono">Google</span>
+                        <span className="text-[9px] bg-black/60 backdrop-blur border border-white/10 px-2 py-0.5 rounded text-white font-mono">TikTok</span>
+                        <span className="text-[9px] bg-black/60 backdrop-blur border border-white/10 px-2 py-0.5 rounded text-white font-mono">Kwai</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-black/40 border-t border-white/5 flex items-center justify-between w-full">
+                      <div>
+                        <h4 className="text-xs font-bold text-white">Proteção AkkaRabbit</h4>
+                        <p className="text-[9px] text-text-muted mt-0.5">Barrar espionagem e bots em tempo real</p>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center border
+                        ${offerMethod === "shield" ? 'border-neon bg-neon text-black' : 'border-white/20'}`}>
+                        {offerMethod === "shield" && <Check className="w-2.5 h-2.5 font-bold" />}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Card B: Pré-Página */}
+                  <button
+                    onClick={() => setOfferMethod("safepage")}
+                    className={`text-left rounded-2xl border overflow-hidden relative group transition-all duration-300 cursor-pointer flex flex-col h-[180px]
+                      ${offerMethod === "safepage"
+                        ? 'border-neon shadow-[0_0_25px_rgba(0,255,65,0.08)] bg-neon/[0.02]'
+                        : 'border-white/5 bg-[#111019] hover:border-white/10 opacity-70 hover:opacity-100'}`}
+                  >
+                    <div className="flex-1 w-full relative overflow-hidden">
+                      <img 
+                        src="/akkarabbit_safepage_banner.png" 
+                        alt="Pré-Página"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black to-black/10" />
+                      
+                      {/* Brand logos overlay */}
+                      <div className="absolute top-3 left-3 flex gap-1">
+                        <span className="text-[9px] bg-black/60 backdrop-blur border border-white/10 px-2 py-0.5 rounded text-white font-mono">Facebook</span>
+                        <span className="text-[9px] bg-black/60 backdrop-blur border border-white/10 px-2 py-0.5 rounded text-white font-mono">MGID</span>
+                      </div>
+                    </div>
+                    
+                    <div className="p-4 bg-black/40 border-t border-white/5 flex items-center justify-between w-full">
+                      <div>
+                        <h4 className="text-xs font-bold text-white">Pré-Página (Safe Page)</h4>
+                        <p className="text-[9px] text-text-muted mt-0.5">Direcionamento inteligente de robôs</p>
+                      </div>
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center border
+                        ${offerMethod === "safepage" ? 'border-neon bg-neon text-black' : 'border-white/20'}`}>
+                        {offerMethod === "safepage" && <Check className="w-2.5 h-2.5 font-bold" />}
+                      </div>
+                    </div>
+                  </button>
+
+                </div>
+              </div>
+
+              {/* 4. Black Page & Safe Page Inputs (Side-by-side) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Black Page Input */}
+                <div className="space-y-2">
+                  <label className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-red-500 rounded-sm" /> Black Page (Oferta) *
+                  </label>
+                  <input
+                    type="url"
+                    value={blackPageUrl}
+                    onChange={(e) => setBlackPageUrl(e.target.value)}
+                    placeholder="https://www.sua-oferta.com/"
+                    className="w-full bg-[#111019] border-l-2 border-l-red-500 border-t border-r border-b border-white/5 hover:border-white/10 focus:border-red-500 rounded-xl px-4 py-3 text-xs text-white focus:outline-none transition-all font-mono"
+                  />
+                  <p className="text-[9px] text-text-muted">Link de destino final para onde os compradores reais irão.</p>
+                </div>
+
+                {/* Safe Page Input */}
+                <div className="space-y-2">
+                  <label className="text-xs font-mono font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <span className="w-1.5 h-3 bg-neon rounded-sm" /> Safe Page (White) *
+                  </label>
+                  <input
+                    type="url"
+                    value={safePageUrl}
+                    onChange={(e) => setSafePageUrl(e.target.value)}
+                    placeholder="https://www.blog-saude.com/"
+                    className="w-full bg-[#111019] border-l-2 border-l-neon border-t border-r border-b border-white/5 hover:border-white/10 focus:border-neon rounded-xl px-4 py-3 text-xs text-white focus:outline-none transition-all font-mono"
+                  />
+                  <p className="text-[9px] text-text-muted">Página limpa de aprovação onde crawlers de revisão e bots ficarão presos.</p>
+                </div>
+
+              </div>
+
+              {/* 5. Modo de Proteção */}
+              <div className="space-y-3">
+                <label className="text-xs font-mono font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1">
+                  ⚙️ Modo de Proteção
+                </label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  {/* Option A: Automático */}
+                  <button
+                    onClick={() => setProtectionMode("auto")}
+                    className={`text-left p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-1
+                      ${protectionMode === "auto"
+                        ? 'border-neon bg-neon/[0.02] shadow-[0_0_15px_rgba(0,255,65,0.03)]'
+                        : 'border-white/5 bg-[#111019] hover:border-white/10'}`}
+                  >
+                    <span className="text-xs font-bold text-white flex items-center gap-1.5 font-mono">
+                      ⚡ Automático
+                    </span>
+                    <span className="text-[10px] text-text-muted leading-relaxed">
+                      URL fica no domínio do cloaker. Funciona instantaneamente com a maioria das páginas sem alterações.
+                    </span>
+                  </button>
+
+                  {/* Option B: Manual */}
+                  <button
+                    onClick={() => setProtectionMode("manual")}
+                    className={`text-left p-4 rounded-xl border transition-all cursor-pointer flex flex-col gap-1
+                      ${protectionMode === "manual"
+                        ? 'border-neon bg-neon/[0.02] shadow-[0_0_15px_rgba(0,255,65,0.03)]'
+                        : 'border-white/5 bg-[#111019] hover:border-white/10'}`}
+                  >
+                    <span className="text-xs font-bold text-neon flex items-center gap-1.5 font-mono">
+                      📋 Manual (Código)
+                    </span>
+                    <span className="text-[10px] text-text-muted leading-relaxed">
+                      URL abre direto na blackpage. Você cola o nosso script de proteção no head do site.
+                    </span>
+                  </button>
+
+                </div>
+              </div>
+
+              {/* Enterprise Settings (Toggles) */}
+              <div className="pt-4 border-t border-white/5 space-y-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <Crown className="w-4 h-4 text-yellow-500" />
+                  <span className="font-mono text-xs text-yellow-500 font-bold uppercase tracking-wider">Arsenal Adicional (Enterprise)</span>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-xl">
+                    <div className="space-y-0.5 pr-2">
+                      <span className="text-xs font-bold text-white block">Canvas Fingerprinting</span>
+                      <span className="text-[9px] text-text-muted block">Gera assinaturas de GPU para blindar emuladores.</span>
+                    </div>
+                    <button
+                      onClick={() => setCanvasFingerprint(!canvasFingerprint)}
+                      className={`w-10 h-5.5 rounded-full relative transition-colors shrink-0 ${canvasFingerprint ? 'bg-neon' : 'bg-black/60 border border-white/10'}`}
+                    >
+                      <span className={`absolute top-1 left-1 w-3.5 h-3.5 bg-white rounded-full transition-transform ${canvasFingerprint ? 'translate-x-4.5' : ''}`} />
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3.5 bg-black/40 border border-white/5 rounded-xl">
+                    <div className="space-y-0.5 pr-2">
+                      <span className="text-xs font-bold text-white block">Honeypot Activo</span>
+                      <span className="text-[9px] text-text-muted block">Injeta armadilhas invisíveis de código para pegar scrapers.</span>
+                    </div>
+                    <button
+                      onClick={() => setHoneypotEnabled(!honeypotEnabled)}
+                      className={`w-10 h-5.5 rounded-full relative transition-colors shrink-0 ${honeypotEnabled ? 'bg-neon' : 'bg-black/60 border border-white/10'}`}
+                    >
+                      <span className={`absolute top-1 left-1 w-3.5 h-3.5 bg-white rounded-full transition-transform ${honeypotEnabled ? 'translate-x-4.5' : ''}`} />
                     </button>
                   </div>
                 </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleShield(domain.id, domain.shield_enabled)}
-                    className={`flex items-center gap-2 px-3 py-2 text-xs font-mono border transition-all ${
-                      domain.shield_enabled
-                        ? "border-neon text-neon bg-neon/10"
-                        : "border-text-muted text-text-muted"
-                    }`}
-                  >
-                    <Shield className="w-3 h-3" />
-                    {domain.shield_enabled ? "Shield ON" : "Shield OFF"}
-                  </button>
-                  <button
-                    onClick={() => deleteDomain(domain.id)}
-                    className="p-2 border border-danger/30 text-danger hover:bg-danger/10 transition-colors"
-                    title="Remover domínio"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Enterprise: Advanced Features Config */}
-              {userPlan === "enterprise" && (
-                <div className="mt-4 pt-4 border-t border-border-neon/30 space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-3 h-3 text-yellow-500" />
-                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Arsenal Enterprise</span>
-                  </div>
-                  
-                  {/* Checkout URL Hijack */}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Link className="w-3 h-3 text-text-muted shrink-0" />
+                {userPlan === "enterprise" && (
+                  <div className="space-y-4 pt-2">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono font-bold text-yellow-500 uppercase tracking-wider block">Link de Retaliação (Checkout)</label>
                       <input
                         type="text"
-                        defaultValue={domain.checkout_url || ""}
-                        placeholder="Link de Retaliação (Ex: pay.hotmart.com)"
-                        className="input-neon text-xs flex-1"
-                        onBlur={(e) => updateCheckoutUrl(domain.id, e.target.value)}
+                        value={checkoutUrl}
+                        onChange={(e) => setCheckoutUrl(e.target.value)}
+                        placeholder="Ex: https://pay.hotmart.com/..."
+                        className="w-full bg-[#111019] border border-yellow-500/20 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all font-mono"
                       />
-                      <Zap className={`w-4 h-4 shrink-0 ${domain.checkout_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
                     </div>
-                  </div>
-
-                  {/* VSL URL Dynamic Injection */}
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <Shield className="w-3 h-3 text-text-muted shrink-0" />
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-mono font-bold text-yellow-500 uppercase tracking-wider block">Iframe VSL Oculto (Dinâmico)</label>
                       <input
                         type="text"
-                        defaultValue={domain.vsl_url || ""}
-                        placeholder="Iframe VSL Oculto (Opcional)"
-                        className="input-neon text-xs flex-1"
-                        onBlur={(e) => updateVslUrl(domain.id, e.target.value)}
+                        value={vslUrl}
+                        onChange={(e) => setVslUrl(e.target.value)}
+                        placeholder="Ex: <iframe src='https://vturb...' />"
+                        className="w-full bg-[#111019] border border-yellow-500/20 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-yellow-500 transition-all font-mono"
                       />
-                      <Zap className={`w-4 h-4 shrink-0 ${domain.vsl_url ? 'text-yellow-500' : 'text-text-muted/30'}`} />
                     </div>
                   </div>
-
-                  {/* MILITARY GRADE CLOAKING */}
-                  <div className="pt-2 mt-2 border-t border-border-neon/10">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="font-mono text-[10px] text-danger uppercase tracking-wider font-bold">Cloaking (BlackHat)</span>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleCloakBots(domain.id, domain.cloak_bots)}
-                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.cloak_bots ? 'bg-danger' : 'bg-bg-secondary border border-border-neon'}`}
-                        >
-                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.cloak_bots ? 'translate-x-5' : ''}`} />
-                        </button>
-                        <span className="text-xs font-mono text-text-secondary">Ativar Redirecionamento de Bots</span>
-                      </div>
-
-                      {domain.cloak_bots && (
-                        <div className="flex items-center gap-2 pl-4 border-l border-danger/30">
-                          <Link className="w-3 h-3 text-text-muted shrink-0" />
-                          <input
-                            type="text"
-                            defaultValue={domain.safe_page_url || ""}
-                            placeholder="URL da Página Safe (Branca)"
-                            className="input-neon text-xs flex-1"
-                            onBlur={(e) => updateSafePageUrl(domain.id, e.target.value)}
-                          />
-                        </div>
-                      )}
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleHoneypot(domain.id, domain.honeypot_enabled)}
-                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.honeypot_enabled ? 'bg-neon' : 'bg-bg-secondary border border-border-neon'}`}
-                        >
-                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.honeypot_enabled ? 'translate-x-5' : ''}`} />
-                        </button>
-                        <span className="text-xs font-mono text-text-secondary">Armadilhas Invisíveis (Honeypot)</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => toggleCanvasFingerprint(domain.id, domain.canvas_fingerprint)}
-                          className={`w-10 h-5 rounded-full relative transition-colors ${domain.canvas_fingerprint ? 'bg-neon' : 'bg-bg-secondary border border-border-neon'}`}
-                        >
-                          <span className={`absolute top-1 left-1 w-3 h-3 bg-white rounded-full transition-transform ${domain.canvas_fingerprint ? 'translate-x-5' : ''}`} />
-                        </button>
-                        <span className="text-xs font-mono text-text-secondary">Canvas Fingerprinting (GPU)</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-      )}
-
-      {/* Add Domain Modal */}
-      <AnimatePresence>
-        {showAddModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-sm p-6 w-full max-w-md border border-border-neon-strong"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-mono text-white font-bold flex items-center gap-2">
-                  <Plus className="w-4 h-4 text-neon" />
-                  Adicionar Domínio
-                </h2>
-                <button
-                  onClick={() => setShowAddModal(false)}
-                  className="text-text-muted hover:text-white"
-                >
-                  <X className="w-5 h-5" />
-                </button>
+                )}
               </div>
 
-              {error && (
-                <div className="flex items-center gap-2 p-3 mb-4 border border-danger/30 bg-danger/10 text-danger text-sm font-mono">
-                  <AlertCircle className="w-4 h-4" />
-                  {error}
-                </div>
-              )}
-
-              <div className="mb-4">
-                <label className="font-mono text-text-muted text-xs uppercase tracking-wider mb-2 block">
-                  URL do Domínio
-                </label>
-                <input
-                  type="text"
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                  placeholder="exemplo.com"
-                  className="input-neon"
-                  id="domain-input"
-                />
-                <p className="font-mono text-text-muted text-[10px] mt-2">
-                  Insira apenas o domínio sem http:// ou https://
-                </p>
-              </div>
-
-              {/* Enterprise: Advanced fields */}
-              {userPlan === "enterprise" && (
-                <div className="space-y-4 mb-4 border border-yellow-500/30 p-4 rounded-sm bg-yellow-500/5">
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-3 h-3 text-yellow-500" />
-                    <span className="font-mono text-[10px] text-yellow-500 uppercase tracking-wider">Arsenal Enterprise</span>
-                  </div>
-                  
-                  <div>
-                    <label className="font-mono text-[10px] text-text-muted mb-1 block">Link de Retaliação (Checkout)</label>
-                    <input
-                      type="text"
-                      value={newCheckoutUrl}
-                      onChange={(e) => setNewCheckoutUrl(e.target.value)}
-                      placeholder="Ex: https://pay.hotmart.com/..."
-                      className="input-neon"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="font-mono text-[10px] text-text-muted mb-1 block">Iframe VSL Oculto (Dinâmico)</label>
-                    <input
-                      type="text"
-                      value={newVslUrl}
-                      onChange={(e) => setNewVslUrl(e.target.value)}
-                      placeholder="Ex: <iframe src='https://vturb...' />"
-                      className="input-neon"
-                    />
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-3">
+              {/* Action Save Campaign & Delete */}
+              <div className="pt-6 border-t border-white/5 flex flex-col sm:flex-row gap-3 justify-between items-center">
+                {selectedDomain ? (
+                  <button
+                    onClick={() => deleteDomain(selectedDomain.id)}
+                    className="text-xs text-red-500 hover:text-red-400 font-mono hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <Trash2 className="w-4 h-4" /> Deletar Campanha
+                  </button>
+                ) : (
+                  <div />
+                )}
+                
                 <button
-                  onClick={() => setShowAddModal(false)}
-                  className="btn-neon flex-1"
+                  onClick={saveCampaign}
+                  disabled={saving || !domainUrl.trim()}
+                  className="btn-neon-filled text-xs py-3 px-8 font-mono font-bold uppercase tracking-wider flex items-center justify-center gap-2 disabled:opacity-50 w-full sm:w-auto"
                 >
-                  Cancelar
-                </button>
-                <button
-                  onClick={addDomain}
-                  disabled={adding || !newDomain.trim()}
-                  className="btn-neon-filled flex-1 flex items-center justify-center gap-2 disabled:opacity-50"
-                  id="confirm-add-domain"
-                >
-                  {adding ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Salvando...
+                    </>
                   ) : (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Adicionar
+                      <CheckCircle2 className="w-4 h-4" /> Salvar Campanha de Proteção
                     </>
                   )}
                 </button>
               </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
-      {/* Script Installation Modal */}
-      <AnimatePresence>
-        {showScriptForDomain && domains.some(d => d.verification_token === showScriptForDomain) && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
-          >
+            </div>
+
+          </div>
+
+          {/* 6. Code Script Generator Box (Panda Style output) */}
+          {selectedDomain && protectionMode === "manual" && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="glass-card rounded-sm p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-border-neon-strong relative"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="glass-card rounded-2xl p-6 md:p-8 border border-white/[0.04] bg-[#07060E] space-y-4"
             >
-              <button
-                onClick={() => setShowScriptForDomain(null)}
-                className="absolute top-4 right-4 text-text-muted hover:text-white"
-              >
-                <X className="w-5 h-5" />
-              </button>
-              
-              <div className="flex items-center gap-2 mb-4">
-                <Shield className="w-5 h-5 text-neon" />
-                <h2 className="font-mono text-white font-bold text-lg">
-                  Como Instalar a Proteção
-                </h2>
+              <div className="flex items-center gap-2">
+                <Code className="w-5 h-5 text-neon" />
+                <h3 className="text-white font-mono text-sm font-bold">
+                  &lt;&gt; Cole este código no &lt;head&gt; da sua blackpage
+                </h3>
               </div>
-              
-              <p className="text-text-secondary text-sm mb-4">
-                Copie o script abaixo e cole-o dentro da tag <code className="text-neon">&lt;head&gt;</code> da sua página (Landing Page, VSL, etc).
-                Ele já está configurado com a sua API Key e URL do domínio.
+              <p className="text-xs text-text-muted leading-relaxed">
+                O código inclui: limpeza de URL, detecção de devtools e bloqueio de clique-direito. Clique abaixo para copiar.
               </p>
-              
+
               <div className="relative">
-                <pre className="bg-black border border-border-neon p-4 rounded-sm max-h-64 overflow-y-auto overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed custom-scrollbar">
+                <pre className="bg-black/60 border border-white/5 p-4 rounded-xl max-h-60 overflow-y-auto overflow-x-auto text-[11px] font-mono text-text-muted leading-relaxed custom-scrollbar relative">
+                  <button
+                    onClick={() => copyToken(selectedDomain.verification_token)}
+                    className="absolute top-4 right-4 bg-white/5 border border-white/10 hover:border-white/20 hover:text-white px-3 py-1.5 rounded-lg text-[10px] font-mono transition-colors flex items-center gap-1.5"
+                  >
+                    {copiedToken === selectedDomain.verification_token ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-neon" /> Copiado!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5" /> Copiar
+                      </>
+                    )}
+                  </button>
 {`<script>
   /* AkkaRabbit Secure Core v3.0 - Behavioral Biometrics */
   (async function(){
     let h=0; let isB=false; let trk=[];
     window.addEventListener('mousemove',(e)=>{
       h++; if(trk.length<10) trk.push(Date.now());
-      if(trk.length>3 && (trk[trk.length-1]-trk[trk.length-2] === 0)) isB=true; // Perfect timing = Bot
+      if(trk.length>3 && (trk[trk.length-1]-trk[trk.length-2] === 0)) isB=true;
     });
     window.addEventListener('touchstart',()=>h++);
     
-    // Canvas Fingerprint generation
     let cv="none";
     try{const c=document.createElement('canvas');const ctx=c.getContext('2d');ctx.fillText('AkkaRabbit',-20,0);cv=c.toDataURL().slice(-50);}catch(e){}
 
     try {
       const res = await fetch('https://${typeof window !== 'undefined' ? window.location.host : 'seusite.com'}/api/v1/shield', {
-        method:'POST', headers:{'Content-Type':'application/json','x-api-key':'COLE_SUA_API_KEY_AQUI'},
+        method:'POST', headers:{'Content-Type':'application/json','x-api-key':'${selectedDomain.verification_token}'},
         body:JSON.stringify({domain:window.location.hostname, cv:cv, beh: isB})
       });
       const d = await res.json();
       if(d.blocked || isB) { window.location.href = 'https://ta-indo-aonde-show.vercel.app/'; return; }
-      
-      // Cloaking Redirect (Safe Page)
       if(d.hijack && d.safe_page) { window.location.replace(d.safe_page); return; }
 
-      // 1. Watermark IP (Invisible)
       if(d.ip) {
         const c=document.createElement('canvas');c.width=200;c.height=100;const ctx=c.getContext('2d');
         ctx.fillStyle='rgba(0,0,0,0.01)';ctx.font='10px Arial';ctx.fillText(d.ip+'|'+window.location.hostname,10,50);
@@ -635,12 +650,10 @@ export default function DomainsPage() {
         document.head.appendChild(st);
       }
 
-      // 2. Dynamic VSL
       if(d.vsl_url) {
         document.querySelectorAll('[data-akka="vsl"]').forEach(el=>el.innerHTML=d.vsl_url);
       }
 
-      // 3. Dead Button Injection (with Behavioral check)
       if(d.inject_checkout && d.checkout_url) {
         document.querySelectorAll('[data-akka="buy"]').forEach(el=>{
           if(el.tagName==='A') el.href=d.checkout_url;
@@ -651,7 +664,6 @@ export default function DomainsPage() {
         });
       }
 
-      // 4. Retaliation Hijack
       if(d.hijack && d.checkout_url) {
         document.querySelectorAll('a[href]').forEach(el=>{
           if(/hotmart|kiwify|eduzz|monetizze|pay|checkout|comprar/i.test(el.href)) el.href=d.checkout_url;
@@ -672,15 +684,15 @@ export default function DomainsPage() {
 
               {/* Enterprise Dead Button Instructions */}
               {userPlan === "enterprise" && (
-                <div className="mt-4 p-4 border border-yellow-500/30 bg-yellow-500/5 rounded-sm">
-                  <div className="flex items-center gap-2 mb-2">
+                <div className="p-4 border border-yellow-500/20 bg-yellow-500/5 rounded-xl space-y-3">
+                  <div className="flex items-center gap-2">
                     <Crown className="w-4 h-4 text-yellow-500" />
                     <span className="font-mono text-xs text-yellow-500 font-bold uppercase">Técnica Botão Morto (Enterprise)</span>
                   </div>
-                  <p className="text-text-muted text-[11px] leading-relaxed mb-3">
-                    Para proteção máxima, adicione o atributo <code className="text-neon">data-akka=&quot;buy&quot;</code> nos seus botões de compra e <strong className="text-white">NÃO coloque o link de checkout diretamente no HTML</strong>. O AkkaRabbit irá injetar o link automaticamente somente após validar o domínio.
+                  <p className="text-text-muted text-[11px] leading-relaxed">
+                    Para proteção máxima contra cópias de site, adicione o atributo <code className="text-neon">data-akka=&quot;buy&quot;</code> nos seus botões de compra e <strong className="text-white">NÃO coloque o link de checkout diretamente no HTML</strong>. O AkkaRabbit irá injetar o link automaticamente somente após validar o visitante.
                   </p>
-                  <pre className="bg-black border border-yellow-500/20 p-3 rounded-sm text-[11px] font-mono text-yellow-500/80 leading-relaxed">
+                  <pre className="bg-black/60 border border-white/5 p-3 rounded-lg text-[10px] font-mono text-yellow-500/80 leading-relaxed overflow-x-auto">
 {`<!-- Exemplo de Botão Morto -->
 <a href="#" data-akka="buy" class="btn-comprar">
   COMPRAR AGORA
@@ -691,24 +703,17 @@ export default function DomainsPage() {
   GERAR PIX
 </button>`}
                   </pre>
-                  <p className="text-text-muted text-[9px] mt-2">
-                    Se o espião apagar o script, os botões ficarão mortos (sem link). Se o espião copiar o script, a retaliação sequestra os botões dele.
+                  <p className="text-text-muted text-[9px]">
+                    Se o espião apagar o script, os botões ficarão mortos (sem link). Se o espião copiar o script, a retaliação sequestra os botões dele e direciona as comissões para você.
                   </p>
                 </div>
               )}
-              
-              <div className="mt-6 flex justify-end">
-                <button
-                  onClick={() => setShowScriptForDomain(null)}
-                  className="btn-neon-filled"
-                >
-                  Entendi
-                </button>
-              </div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+        </div>
+
+      </div>
     </div>
   );
 }
