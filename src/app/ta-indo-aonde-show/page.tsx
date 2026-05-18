@@ -55,8 +55,8 @@ export default function TaIndoAondeShow() {
           </div>
 
           {/* User Troll Phrase */}
-          <div className="p-4 bg-red-500/5 border border-red-500/20 rounded-xl max-w-md">
-            <p className="font-mono text-sm sm:text-base text-white font-bold leading-relaxed">
+          <div className="p-6 bg-red-650/15 border-2 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.4),inset 0_0_15px_rgba(239,68,68,0.2)] rounded-xl max-w-md w-full">
+            <p className="font-mono text-base sm:text-lg text-red-500 font-black uppercase tracking-wider leading-relaxed drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">
               &quot;pensou que o era o espertão né? seu trouxa, clona ai agora&quot;
             </p>
           </div>
